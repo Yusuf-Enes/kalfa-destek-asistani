@@ -1,0 +1,153 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Destekçi · Müşteri destek asistanı</title>
+  <meta name="description" content="Destekçi, küçük işletmelerde sık sorulan müşteri sorularını yanıtlar; yanıtlayamadıklarını ekibinize devreder. Kurgusal bir hizmet sayfasıdır.">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <a class="skip" href="#talep">Talep formuna geç</a>
+
+  <header class="site-header">
+    <div class="wrap bar">
+      <a class="brand" href="/" aria-label="Destekçi ana sayfa">Destekçi</a>
+      <a class="btn btn-small" href="#talep">Talep oluştur</a>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero" aria-labelledby="hero-title">
+      <div class="wrap hero-grid">
+        <div class="hero-copy">
+          <h1 id="hero-title">Aynı soruya yüzüncü kez cevap yazmayın.</h1>
+          <p class="lead">Destekçi, müşterilerinizin sık sorduğu soruları sizin yerinize yanıtlar. Yanıtlayamadığı ya da sizin onayınızı gerektiren konuları ekibinize devreder.</p>
+          <p><a class="btn" href="#talep">Talep oluştur</a></p>
+          <p class="fine">Kurgusal bir hizmettir. Formda gerçek kişisel bilgi yazmayın.</p>
+        </div>
+
+        <figure class="chat" aria-label="Örnek müşteri konuşması">
+          <figcaption class="chat-caption">Örnek konuşma</figcaption>
+          <ol class="chat-log">
+            <li class="msg msg-customer"><span class="who">Müşteri</span>Siparişim ne zaman gelir? Sipariş no: 4821</li>
+            <li class="msg msg-bot"><span class="who">Destekçi</span>4821 numaralı siparişiniz dün kargoya verildi. Tahmini teslim perşembe. Takip kodunu e-postanıza gönderdim.</li>
+            <li class="msg msg-customer"><span class="who">Müşteri</span>Başka bir üründen vazgeçtim, iade etmek istiyorum.</li>
+            <li class="msg msg-bot"><span class="who">Destekçi</span>İade talebinizi not aldım. Bu konuyu ekibimiz onaylıyor. En geç yarın size e-postayla dönecekler.</li>
+            <li class="msg msg-note"><span class="who">Ekibe devredildi</span>İade talebi · sipariş 4830 · onay bekliyor</li>
+          </ol>
+        </figure>
+      </div>
+    </section>
+
+    <section class="band" aria-labelledby="problem-title">
+      <div class="wrap narrow">
+        <h2 id="problem-title">Destek, küçük ekiplerin mesaisini yer.</h2>
+        <p>Gelen mesajların çoğu birbirine benzer: kargo nerede, iade nasıl yapılır, hangi saatlerde açıksınız. Bunlara elle cevap yazarken asıl işiniz bekler, karmaşık bir müşteri sorusu da sırada kaybolur.</p>
+        <p>Destekçi bu tekrar eden soruları üstlenir. Siz yalnızca gerçekten sizin ilginizi isteyen konularla ilgilenirsiniz.</p>
+      </div>
+    </section>
+
+    <section class="wrap section" aria-labelledby="steps-title">
+      <h2 id="steps-title">Nasıl çalışır</h2>
+      <ol class="steps">
+        <li>
+          <h3>Sık sorularınızı ekleyin</h3>
+          <p>Kargo, iade, çalışma saatleri gibi konulardaki cevaplarınızı bir kez yazarsınız.</p>
+        </li>
+        <li>
+          <h3>Destekçi müşterilere yanıt verir</h3>
+          <p>Gelen soruyu anlar, ilgili cevabı müşterinin diliyle iletir.</p>
+        </li>
+        <li>
+          <h3>Zor konular size gelir</h3>
+          <p>İade onayı ya da şikâyet gibi konuları, konuşmanın özetiyle birlikte ekibinize devreder.</p>
+        </li>
+      </ol>
+    </section>
+
+    <section class="band" aria-labelledby="services-title">
+      <div class="wrap">
+        <h2 id="services-title">Üç şekilde kullanabilirsiniz</h2>
+        <dl class="services">
+          <div>
+            <dt>SSS botu</dt>
+            <dd>Web sitenizdeki sık sorulan soruları müşterinin yazdığı cümleyle eşleştirip yanıtlar.</dd>
+          </div>
+          <div>
+            <dt>E-posta cevap taslakları</dt>
+            <dd>Gelen e-postalara hazır bir taslak yazar. Göndermeden önce siz okur ve düzeltirsiniz.</dd>
+          </div>
+          <div>
+            <dt>Canlı sohbet asistanı</dt>
+            <dd>Sitenizdeki sohbet kutusunda müşteriyle konuşur, gerektiğinde konuşmayı size aktarır.</dd>
+          </div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="wrap section form-section" id="talep" aria-labelledby="form-title" tabindex="-1">
+      <div class="form-intro">
+        <h2 id="form-title">Talep oluşturun</h2>
+        <p>İşletmenizi ve ihtiyacınızı kısaca anlatın. Talebiniz kaydedilince size bir talep numarası gösteririz.</p>
+        <p class="fine">Bu bir değerlendirme çalışmasıdır. Yalnızca kurgusal test verisi girin.</p>
+      </div>
+
+      <div class="form-panel">
+        <form id="request-form" novalidate>
+          <div class="field">
+            <label for="name">Adınız</label>
+            <input id="name" name="name" type="text" autocomplete="name" maxlength="80" required aria-describedby="name-error">
+            <p class="error" id="name-error" hidden></p>
+          </div>
+
+          <div class="field">
+            <label for="email">E-posta</label>
+            <input id="email" name="email" type="email" autocomplete="email" inputmode="email" maxlength="254" required aria-describedby="email-error">
+            <p class="error" id="email-error" hidden></p>
+          </div>
+
+          <div class="field">
+            <label for="service">Hizmet</label>
+            <select id="service" name="service" required aria-describedby="service-error">
+              <option value="">Bir hizmet seçin</option>
+              <option value="sss-botu">SSS botu</option>
+              <option value="e-posta-taslak">E-posta cevap taslakları</option>
+              <option value="canli-sohbet">Canlı sohbet asistanı</option>
+            </select>
+            <p class="error" id="service-error" hidden></p>
+          </div>
+
+          <div class="field">
+            <label for="message">Ne yapmak istiyorsunuz?</label>
+            <textarea id="message" name="message" rows="5" maxlength="1000" required aria-describedby="message-hint message-error"></textarea>
+            <p class="hint" id="message-hint"><span id="message-count">0</span> / 1000 karakter. En az 10 karakter yazın.</p>
+            <p class="error" id="message-error" hidden></p>
+          </div>
+
+          <div id="form-alert" class="form-alert" role="alert" hidden></div>
+
+          <button class="btn btn-block" type="submit" id="submit-btn">Talebi gönder</button>
+          <noscript><p class="error">Formu göndermek için JavaScript gerekir.</p></noscript>
+        </form>
+
+        <div id="success" class="success" role="status" tabindex="-1" hidden>
+          <h3>Talebiniz kaydedildi</h3>
+          <p>Talep numaranız: <strong id="success-id"></strong></p>
+          <p>Bu numarayı not alın. Kayıt sunucuya yazıldı.</p>
+          <button class="btn btn-quiet" type="button" id="new-request">Yeni talep oluştur</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>Destekçi kurgusal bir hizmettir ve yalnızca bu değerlendirme için hazırlanmıştır.</p>
+    </div>
+  </footer>
+
+  <script src="/validation.js"></script>
+  <script src="/app.js"></script>
+</body>
+</html>

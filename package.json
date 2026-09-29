@@ -1,0 +1,27 @@
+{
+  "name": "destek-asistani",
+  "version": "1.0.0",
+  "description": "Destekçi: kurgusal müşteri destek asistanı landing page ve talep formu",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "test": "node --test tests/",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "@electric-sql/pglite": "^0.5.8",
+    "express": "^5.2.1",
+    "express-rate-limit": "^8.7.0",
+    "helmet": "^8.3.0",
+    "pg": "^8.23.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
