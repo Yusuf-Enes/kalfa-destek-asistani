@@ -3,12 +3,11 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Antre · Müşteri destek asistanı</title>
-  <meta name="description" content="Antre, işletmenizin sık sorulan müşteri sorularını yanıtlar; onay ya da özen gerektiren konuları ekibinize devreder. Kurgusal bir hizmet sayfasıdır.">
-  <meta name="theme-color" content="#E9EAE6">
+  <title>Kalfa · Müşteri destek asistanı</title>
+  <meta name="description" content="Kalfa, işletmenizin sık sorulan müşteri sorularını yanıtlar; onay ya da özen gerektiren işleri özetiyle birlikte size, yani ustaya bırakır. Kurgusal bir hizmet sayfasıdır.">
+  <meta name="theme-color" content="#E6ECE8">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="preload" href="/fonts/jost-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/jost-latin-ext.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/archivo-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/styles.css">
   <script src="/motion.js"></script>
 </head>
@@ -17,19 +16,19 @@
 
   <header class="site-header">
     <div class="wrap bar">
-      <a class="brand" href="/" aria-label="Antre ana sayfa">
-        <svg class="logo-mark" viewBox="0 0 40 48" aria-hidden="true" focusable="false">
-          <path class="arch-outer" d="M5 45V20a15 15 0 0 1 30 0v25"/>
-          <path class="arch-inner" d="M14 45V25a6 6 0 0 1 12 0v20Z"/>
-          <path class="arch-ground" d="M2 45h36"/>
+      <a class="brand" href="/" aria-label="Kalfa ana sayfa">
+        <svg class="logo-mark" viewBox="0 0 40 44" aria-hidden="true" focusable="false">
+          <path class="apron-body" d="M8 3h8v9h8V3h8v36a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2Z"/>
+          <rect class="apron-pocket" x="14" y="26" width="12" height="9" rx="1"/>
         </svg>
-        <span class="wordmark">Antre</span>
+        <span class="wordmark">Kalfa</span>
       </a>
       <nav class="nav" aria-label="Sayfa bölümleri">
+        <a href="#kim">Kim neye bakar</a>
         <a href="#nasil">Nasıl çalışır</a>
         <a href="#hizmetler">Hizmetler</a>
       </nav>
-      <a class="btn btn-line btn-small" href="#talep">Talep oluştur</a>
+      <a class="btn btn-small" href="#talep">Talep oluştur</a>
     </div>
   </header>
 
@@ -37,28 +36,35 @@
     <section class="hero" aria-labelledby="hero-title">
       <div class="wrap hero-grid">
         <div class="hero-copy">
-          <h1 id="hero-title"><span class="w"><span>Kapıyı</span></span> <span class="w"><span>sizin</span></span> <span class="w"><span>yerinize</span></span> <span class="w"><span>açar.</span></span></h1>
-          <p class="lead">Antre, müşterilerinizin sık sorduğu soruları yanıtlar. Onay ya da özen gerektiren konuları, konuşmanın özetiyle birlikte size devreder.</p>
+          <h1 id="hero-title"><span class="w"><span>Kalfa</span></span> <span class="w"><span>bakar,</span></span> <span class="w"><span>usta</span></span> <span class="w"><span>karar</span></span> <span class="w"><span>verir.</span></span></h1>
+          <p class="lead">Kalfa, işletmenizin sık sorulan müşteri sorularını yanıtlar. Onay ya da özen gerektiren işleri, özetiyle birlikte size, yani ustaya bırakır.</p>
           <div class="cta-row">
             <a class="btn" href="#talep">Talep oluştur</a>
-            <a class="text-link" href="#ornek">Örnek konuşmayı görün</a>
+            <a class="text-link" href="#ornek">Bir işin ustaya nasıl gittiğini görün</a>
           </div>
           <p class="fine">Kurgusal bir hizmettir. Formda gerçek kişisel bilgi yazmayın.</p>
         </div>
 
-        <figure class="arch chat" id="ornek" aria-label="Örnek müşteri konuşması">
-          <svg class="logo-mark arch-emblem" viewBox="0 0 40 48" aria-hidden="true" focusable="false">
-            <path class="arch-outer" d="M5 45V20a15 15 0 0 1 30 0v25"/>
-            <path class="arch-inner" d="M14 45V25a6 6 0 0 1 12 0v20Z"/>
-            <path class="arch-ground" d="M2 45h36"/>
-          </svg>
+        <figure class="chat" id="ornek" aria-label="Örnek müşteri konuşması ve ustaya bırakılan iş fişi">
           <figcaption class="chat-caption">Örnek konuşma</figcaption>
           <ol class="chat-log">
             <li class="msg msg-customer"><span class="who">Müşteri</span><span class="txt">Siparişim ne zaman gelir? Sipariş no: 4821</span></li>
-            <li class="msg msg-bot"><span class="who">Antre</span><span class="txt">4821 numaralı siparişiniz dün kargoya verildi. Tahmini teslim perşembe. Takip kodunu e-postanıza gönderdim.</span></li>
+            <li class="msg msg-bot"><span class="who">Kalfa</span><span class="txt">4821 numaralı siparişiniz dün kargoya verildi. Tahmini teslim perşembe. Takip kodunu e-postanıza gönderdim.</span></li>
             <li class="msg msg-customer"><span class="who">Müşteri</span><span class="txt">Başka bir üründen vazgeçtim, iade etmek istiyorum.</span></li>
-            <li class="msg msg-bot"><span class="who">Antre</span><span class="txt">İade talebinizi not aldım. Bu konuyu ekibimiz onaylıyor. En geç yarın size e-postayla dönecekler.</span></li>
-            <li class="msg msg-note"><span class="who">Ekibe devredildi</span><span class="txt">İade talebi, sipariş 4830. Onayınız bekleniyor.</span></li>
+            <li class="msg msg-bot"><span class="who">Kalfa</span><span class="txt">İade talebinizi aldım. Bunu ustaya soruyorum, en geç yarın size e-postayla dönecekler.</span></li>
+            <li class="msg msg-note">
+              <div class="slip-shadow">
+                <div class="slip">
+                  <span class="who">Ustaya not</span>
+                  <dl class="slip-lines">
+                    <div><dt>Konu</dt><dd>İade talebi</dd></div>
+                    <div><dt>Sipariş</dt><dd>4830</dd></div>
+                    <div><dt>Kalfa'nın özeti</dt><dd>Müşteri vazgeçti, ürün açılmamış. Onayınız bekleniyor.</dd></div>
+                  </dl>
+                  <span class="stamp">Ustaya devredildi</span>
+                </div>
+              </div>
+            </li>
           </ol>
         </figure>
       </div>
@@ -66,32 +72,59 @@
 
     <section class="statement" aria-labelledby="problem-title">
       <div class="wrap statement-grid">
-        <h2 id="problem-title">Destek, küçük ekiplerin mesaisini yer.</h2>
+        <h2 id="problem-title">Dükkân açıkken telefon susmaz.</h2>
         <div class="statement-body">
-          <p>Gelen mesajların çoğu birbirine benzer: kargo nerede, iade nasıl yapılır, hangi saatlerde açıksınız. Bunlara elle cevap yazarken asıl işiniz bekler, karmaşık bir müşteri sorusu da sırada kaybolur.</p>
-          <p>Antre bu tekrar eden soruları üstlenir. Siz yalnızca gerçekten sizin ilginizi isteyen konularla ilgilenirsiniz.</p>
+          <p>Kargo nerede, iade nasıl yapılır, kaça kadar açıksınız. Aynı soruya her gün yeniden cevap vermek, işin başından ayrılmak demek. Karmaşık bir müşteri sorusu da sırada kaybolur.</p>
+          <p>Kalfa tekrar eden sorulara bakar. Siz yalnızca sizin kararınızı isteyen işlerle ilgilenirsiniz.</p>
         </div>
+      </div>
+    </section>
+
+    <section class="split" id="kim" aria-labelledby="split-title">
+      <div class="wrap">
+        <h2 id="split-title">Kim neye bakar</h2>
+        <div class="split-grid">
+          <div class="split-col split-kalfa">
+            <h3>Kalfa'ya gider</h3>
+            <ul>
+              <li>Kargo ve teslimat durumu</li>
+              <li>Çalışma saatleri ve adres</li>
+              <li>İade ve değişim nasıl yapılır</li>
+              <li>Ürün ve fiyat bilgisi, sizin yazdığınız cevaplardan</li>
+            </ul>
+          </div>
+          <div class="split-col split-usta">
+            <h3>Ustaya gider</h3>
+            <ul>
+              <li>İade ve para iadesi onayı</li>
+              <li>Şikâyet ve memnuniyetsizlik</li>
+              <li>Özel fiyat ve indirim talepleri</li>
+              <li>Cevabını bilmediği her soru</li>
+            </ul>
+          </div>
+        </div>
+        <p class="split-note">Ustaya giden her iş, konuşmanın özetiyle birlikte bir iş fişi olarak gelir. Müşteriye aynı sorular tekrar sorulmaz.</p>
       </div>
     </section>
 
     <section class="how" id="nasil" aria-labelledby="steps-title">
       <div class="wrap how-grid">
         <div class="how-intro">
-          <h2 id="steps-title">Nasıl çalışır</h2>
-          <p>Kurulum üç adımdır. Sonrasında müşteriniz kapıda karşılanır, siz yalnızca içeri gelmesi gerekenlerle ilgilenirsiniz.</p>
+          <h2 id="steps-title">Bir iş nasıl yürür</h2>
+          <p>Kurulum bir defa yapılır. Sonrasında dükkân açıkken kalfa tezgâhta durur.</p>
         </div>
         <ol class="steps" id="steps">
           <li>
-            <h3>Sık sorularınızı ekleyin</h3>
-            <p>Kargo, iade, çalışma saatleri gibi konulardaki cevaplarınızı bir kez yazarsınız.</p>
+            <h3>Defterinizi doldurun</h3>
+            <p>Sık sorulan soruları ve cevaplarınızı bir kez yazarsınız.</p>
           </li>
           <li>
-            <h3>Antre müşterilere yanıt verir</h3>
-            <p>Gelen soruyu anlar, ilgili cevabı müşterinin diliyle iletir.</p>
+            <h3>Kalfa müşteriye bakar</h3>
+            <p>Gelen soruyu anlar, cevabı müşterinin diliyle iletir.</p>
           </li>
           <li>
-            <h3>Zor konular size gelir</h3>
-            <p>İade onayı ya da şikâyet gibi konuları, konuşmanın özetiyle birlikte ekibinize devreder.</p>
+            <h3>Zor iş ustaya gider</h3>
+            <p>İade onayı ya da şikâyet gibi işleri, konuşmanın özetiyle birlikte size bırakır.</p>
           </li>
         </ol>
       </div>
@@ -99,19 +132,19 @@
 
     <section class="services-band" id="hizmetler" aria-labelledby="services-title">
       <div class="wrap">
-        <h2 id="services-title">Üç şekilde kullanabilirsiniz</h2>
+        <h2 id="services-title">Kalfa'yı üç yerde çalıştırabilirsiniz</h2>
         <dl class="services">
           <div>
             <dt>SSS botu</dt>
-            <dd>Web sitenizdeki sık sorulan soruları müşterinin yazdığı cümleyle eşleştirip yanıtlar.</dd>
+            <dd>Sık sorulan sorular sayfanızda, müşterinin yazdığı cümleyi doğru cevapla eşleştirir.</dd>
           </div>
           <div>
             <dt>E-posta cevap taslakları</dt>
-            <dd>Gelen e-postalara hazır bir taslak yazar. Göndermeden önce siz okur ve düzeltirsiniz.</dd>
+            <dd>Gelen kutunuzdaki e-postalara hazır bir taslak yazar. Göndermeden önce siz okur ve düzeltirsiniz.</dd>
           </div>
           <div>
             <dt>Canlı sohbet asistanı</dt>
-            <dd>Sitenizdeki sohbet kutusunda müşteriyle konuşur, gerektiğinde konuşmayı size aktarır.</dd>
+            <dd>Sitenizdeki sohbet kutusunda müşteriyle konuşur, gerektiğinde işi ustaya, yani size aktarır.</dd>
           </div>
         </dl>
       </div>
@@ -121,57 +154,59 @@
       <div class="wrap form-grid">
         <div class="form-intro">
           <h2 id="form-title">Talep oluşturun</h2>
-          <p>İşletmenizi ve ihtiyacınızı kısaca anlatın. Talebiniz kaydedilince size bir talep numarası gösteririz.</p>
+          <p>İşletmenizi ve ihtiyacınızı kısaca anlatın. Talebiniz kaydedilince size bir talep numarası veririz.</p>
           <p class="fine">Bu bir değerlendirme çalışmasıdır. Yalnızca kurgusal test verisi girin.</p>
         </div>
 
         <div class="form-panel">
-          <form id="request-form" novalidate>
-            <div class="field">
-              <label for="name">Adınız</label>
-              <input id="name" name="name" type="text" autocomplete="name" maxlength="80" required aria-describedby="name-error">
-              <p class="error" id="name-error" hidden></p>
+          <div class="form-sheet">
+            <form id="request-form" novalidate>
+              <div class="field">
+                <label for="name">Adınız</label>
+                <input id="name" name="name" type="text" autocomplete="name" maxlength="80" required aria-describedby="name-error">
+                <p class="error" id="name-error" hidden></p>
+              </div>
+
+              <div class="field">
+                <label for="email">E-posta</label>
+                <input id="email" name="email" type="email" autocomplete="email" inputmode="email" maxlength="254" required aria-describedby="email-error">
+                <p class="error" id="email-error" hidden></p>
+              </div>
+
+              <div class="field">
+                <label for="service">Hizmet</label>
+                <select id="service" name="service" required aria-describedby="service-error">
+                  <option value="">Bir hizmet seçin</option>
+                  <option value="sss-botu">SSS botu</option>
+                  <option value="e-posta-taslak">E-posta cevap taslakları</option>
+                  <option value="canli-sohbet">Canlı sohbet asistanı</option>
+                </select>
+                <p class="error" id="service-error" hidden></p>
+              </div>
+
+              <div class="field">
+                <label for="message">Ne yapmak istiyorsunuz?</label>
+                <textarea id="message" name="message" rows="5" maxlength="1000" required aria-describedby="message-hint message-error"></textarea>
+                <p class="hint" id="message-hint"><span id="message-count">0</span> / 1000 karakter. En az 10 karakter yazın.</p>
+                <p class="error" id="message-error" hidden></p>
+              </div>
+
+              <div id="form-alert" class="form-alert" role="alert" hidden></div>
+
+              <button class="btn btn-block" type="submit" id="submit-btn">Talebi gönder</button>
+              <noscript><p class="error">Formu göndermek için JavaScript gerekir.</p></noscript>
+            </form>
+
+            <div id="success" class="success" role="status" tabindex="-1" hidden>
+              <svg class="check" viewBox="0 0 48 48" aria-hidden="true" focusable="false">
+                <circle class="check-circle" cx="24" cy="24" r="21"/>
+                <path class="check-mark" d="M14 25l7 7 13-15"/>
+              </svg>
+              <h3>Talebiniz kaydedildi</h3>
+              <p>Talep numaranız: <strong id="success-id"></strong></p>
+              <p>Bu numarayı not alın. Kayıt sunucuya yazıldı.</p>
+              <button class="btn btn-quiet" type="button" id="new-request">Yeni talep oluştur</button>
             </div>
-
-            <div class="field">
-              <label for="email">E-posta</label>
-              <input id="email" name="email" type="email" autocomplete="email" inputmode="email" maxlength="254" required aria-describedby="email-error">
-              <p class="error" id="email-error" hidden></p>
-            </div>
-
-            <div class="field">
-              <label for="service">Hizmet</label>
-              <select id="service" name="service" required aria-describedby="service-error">
-                <option value="">Bir hizmet seçin</option>
-                <option value="sss-botu">SSS botu</option>
-                <option value="e-posta-taslak">E-posta cevap taslakları</option>
-                <option value="canli-sohbet">Canlı sohbet asistanı</option>
-              </select>
-              <p class="error" id="service-error" hidden></p>
-            </div>
-
-            <div class="field">
-              <label for="message">Ne yapmak istiyorsunuz?</label>
-              <textarea id="message" name="message" rows="5" maxlength="1000" required aria-describedby="message-hint message-error"></textarea>
-              <p class="hint" id="message-hint"><span id="message-count">0</span> / 1000 karakter. En az 10 karakter yazın.</p>
-              <p class="error" id="message-error" hidden></p>
-            </div>
-
-            <div id="form-alert" class="form-alert" role="alert" hidden></div>
-
-            <button class="btn btn-block" type="submit" id="submit-btn">Talebi gönder</button>
-            <noscript><p class="error">Formu göndermek için JavaScript gerekir.</p></noscript>
-          </form>
-
-          <div id="success" class="success" role="status" tabindex="-1" hidden>
-            <svg class="check" viewBox="0 0 48 56" aria-hidden="true" focusable="false">
-              <path class="check-circle" d="M6 52V22a18 18 0 0 1 36 0v30"/>
-              <path class="check-mark" d="M16 32l6 6 11-13"/>
-            </svg>
-            <h3>Talebiniz kaydedildi</h3>
-            <p>Talep numaranız: <strong id="success-id"></strong></p>
-            <p>Bu numarayı not alın. Kayıt sunucuya yazıldı.</p>
-            <button class="btn btn-quiet" type="button" id="new-request">Yeni talep oluştur</button>
           </div>
         </div>
       </div>
@@ -181,14 +216,13 @@
   <footer class="site-footer">
     <div class="wrap footer-bar">
       <span class="brand brand-static">
-        <svg class="logo-mark" viewBox="0 0 40 48" aria-hidden="true" focusable="false">
-          <path class="arch-outer" d="M5 45V20a15 15 0 0 1 30 0v25"/>
-          <path class="arch-inner" d="M14 45V25a6 6 0 0 1 12 0v20Z"/>
-          <path class="arch-ground" d="M2 45h36"/>
+        <svg class="logo-mark" viewBox="0 0 40 44" aria-hidden="true" focusable="false">
+          <path class="apron-body" d="M8 3h8v9h8V3h8v36a2 2 0 0 1-2 2H10a2 2 0 0 1-2-2Z"/>
+          <rect class="apron-pocket" x="14" y="26" width="12" height="9" rx="1"/>
         </svg>
-        <span class="wordmark">Antre</span>
+        <span class="wordmark">Kalfa</span>
       </span>
-      <p>Antre kurgusal bir hizmettir ve yalnızca bu değerlendirme için hazırlanmıştır.</p>
+      <p>Kalfa kurgusal bir hizmettir ve yalnızca bu değerlendirme için hazırlanmıştır.</p>
     </div>
   </footer>
 

@@ -1,88 +1,92 @@
-# Antre marka rehberi
+# Kalfa marka rehberi
 
 ## Fikir
 
-**Antre**, bir binanın giriş holü demektir. Hizmet de tam olarak bunu yapar: müşteriyi kapıda karşılar, sık sorulan sorulara yanıt verir, özen ya da onay gerektiren konuları içeri, ekibe taşır. Kurgusal bir hizmettir.
+Esnaf dükkânında **kalfa** günlük işlere bakar, zor bir işte **ustaya** danışır. Hizmet de tam olarak böyle çalışır: Kalfa (asistan) müşterilerin sık sorduğu sorulara yanıt verir, onay ya da özen gerektiren işleri **iş fişine** yazıp ustaya, yani işletme sahibine bırakır. Kurgusal bir hizmettir.
 
-Marka bir **eşiği** anlatır. Bu yüzden tek görsel dil kemerdir (kapı açıklığı). Sayfadaki tek yuvarlak biçim kemerdir, geri kalan her şey köşelidir (köşe yarıçapı 2 px).
+Marka kendi işini anlatır. Sayfadaki her görsel karar (dar ve kalın tabela yazısı, tezgâh yeşili, tırtıklı fiş, kırmızı mühür) hizmetin devir mantığından çıkar.
 
 ## Logo
 
-**Simge:** İç içe iki kemer ve bir zemin çizgisi. Dıştaki ince çizgiyle çizilmiş bir kapı açıklığı, içteki dolu kemer o kapıda duran kişidir.
+**Simge:** Kalfa önlüğü. Boyun boşluğu, iki askı ve cep.
 
-| Kullanım | Renk |
-|---|---|
-| Açık zemin | Bordo `#6A1B31` |
-| Bordo zemin (kemer içinde) | Gül `#D9C2C7` |
-| Koyu bordo zemin (alt bilgi) | Kâğıt `#F7F7F4` |
+| Kullanım | Önlük | Cep çizgisi |
+|---|---|---|
+| Açık zemin | Tezgâh yeşili `#1F4B3E` | Sis `#E6ECE8` |
+| Koyu zemin (alt bilgi) | Açık `#EEF3F0` | Koyu tezgâh `#163A30` |
 
-**Yazı:** "Antre", Jost 500, harf aralığı +0.01em.
+Cep çizgisi her zaman zeminin rengindedir, böylece cep önlükten "oyulmuş" görünür.
 
-**Dosyalar:** `public/logo.svg` (simge), `public/favicon.svg` (sekme simgesi). Sayfadaki logolar satır içi SVG'dir, böylece rengi bağlama göre CSS ile değişir. Üzerine gelince iç kemer hafifçe yükselir (kapı aralanır).
+**Yazı:** "Kalfa", Archivo 800, dar genişlik (%78).
 
-**Kurallar:** Simgenin çevresinde en az simge genişliği kadar boşluk bırakın. Eğmeyin, gölge eklemeyin, dolgusunu değiştirmeyin. En küçük kullanım genişliği 16 px.
+**Dosyalar:** `public/logo.svg` (simge), `public/favicon.svg` (sekme simgesi). Sayfadaki logolar satır içi SVG'dir, böylece renk bağlama göre CSS ile değişir. Üzerine gelince önlük hafifçe sallanır.
+
+**Kurallar:** Simgenin çevresinde en az simge genişliğinin yarısı kadar boşluk bırakın. Eğmeyin, gölge eklemeyin, renklerini bu tablo dışında değiştirmeyin. En küçük kullanım genişliği 16 px.
 
 ## Renk paleti
 
 | Ad | Değer | Rol |
 |---|---|---|
-| Kireç | `#E9EAE6` | Ana zemin |
-| Kireç koyu | `#DEDFDA` | Form bölümü zemini |
-| Kâğıt | `#F7F7F4` | Yüzeyler (form paneli, "Nasıl çalışır" bölümü) |
-| Şarap mürekkebi | `#26121A` | Metin |
-| Bordo | `#6A1B31` | Marka rengi: kemer, düğme, bağlantı |
-| Koyu bordo | `#4A1122` | Alt bilgi, düğme üzerine gelme |
-| Gül | `#D9C2C7` | Bordo zeminde ikincil metin |
-| Soluk metin | `#5E5459` | İkincil metin |
-| Hata | `#A8261D` | Yalnızca hata mesajları |
+| Sis | `#E6ECE8` | Ana zemin |
+| Sis koyu | `#D9E2DD` | İnce ayırıcılar |
+| Fiş beyazı | `#FFFFFF` | Konuşma kartı, fiş, form, "Nasıl çalışır" bölümü |
+| Tezgâh yeşili | `#1F4B3E` | Marka rengi: başlık, düğme, Kalfa balonu, form bölümü |
+| Koyu tezgâh | `#163A30` | Alt bilgi, düğme üzerine gelme |
+| Metin | `#17372E` | Metin (koyu tezgâh yeşili) |
+| Soluk metin | `#46574F` | İkincil metin |
+| Mühür kırmızısı | `#C4382B` | Yalnızca beyaz fişin üzerindeki "Ustaya devredildi" mührü |
+| Hata | `#B3261E` | Yalnızca hata mesajları |
 
-Renk seçimi bilinçlidir: koyu lacivert ve sarı, krem ve toprak rengi, siyah ve canlı yeşil gibi yapay zekâ ve SaaS sayfalarında sık görülen ikililer kullanılmadı. Bordo ve kireç, otel ve özel kulüp dünyasından gelir.
+Renkler konudan gelir: tezgâh yeşili atölye makinelerinin boyasıdır, fiş beyazı kâğıt fiştir, kırmızı da mühür mürekkebidir. Lacivert ve sarı, krem ve toprak rengi, bordo ve kireç gibi genel kalıplar kullanılmadı.
 
 ### Kontrast (WCAG, hesaplanmış değerler)
 
 | Çift | Oran |
 |---|---|
-| Metin / kireç | 14,68 |
-| Metin / kâğıt | 16,53 |
-| Metin / kireç koyu | 13,24 |
-| Soluk metin / kireç | 6,02 |
-| Soluk metin / kâğıt | 6,77 |
-| Soluk metin / kireç koyu | 5,43 |
-| Bordo / kireç (bağlantı, başlık numaraları) | 9,58 |
-| Kâğıt / bordo (düğme, Antre satırları) | 10,79 |
-| Gül / bordo (etiketler) | 6,89 |
-| Gül-yumuşak `#ECDDE0` / bordo (müşteri satırları) | 8,81 |
-| Gül / koyu bordo (alt bilgi) | 8,96 |
-| Hata / kâğıt | 6,61 |
-| Hata / hata zemini | 6,18 |
-| Form çerçevesi `#8A8083` / kâğıt (grafik için en az 3) | 3,56 |
+| Metin / sis | 10,80 |
+| Metin / beyaz | 12,94 |
+| Soluk metin / sis | 6,41 |
+| Soluk metin / beyaz | 7,67 |
+| Soluk metin / sis koyu | 5,80 |
+| Beyaz / tezgâh yeşili (düğme, Kalfa balonu) | 9,84 |
+| Açık `#EEF3F0` / tezgâh yeşili (form bölümü, "Ustaya gider") | 8,77 |
+| Açık soluk `#B9CCC2` / tezgâh yeşili | 5,85 |
+| Açık soluk / koyu tezgâh (alt bilgi) | 7,42 |
+| Tezgâh yeşili / sis (bağlantı, başlık) | 8,21 |
+| Mühür kırmızısı / beyaz | 5,32 |
+| Hata / beyaz | 6,54 |
+| Form çerçevesi `#7C8C84` / beyaz (grafik için en az 3) | 3,53 |
+| Mühür kırmızısı / sis | **4,44** (yetersiz, bu yüzden kırmızı yalnızca beyaz fişte kullanılır) |
 
 ## Yazı tipi
 
-**Jost**, tek aile. Geometrik ve sakin, kemer biçimiyle uyumlu. Başlıklar büyük ve ince (300), gövde normal (400), vurgular 500. Sunucudan yayınlanır (`public/fonts/`), Google'a istek atılmaz. Lisans: SIL Open Font License 1.1 (`public/fonts/OFL.txt`). Türkçe karakterler (ğ, ş, ı, İ) için `latin` ve `latin-ext` alt kümeleri yüklüdür.
+**Archivo**, tek aile, iki genişlik. Başlıklar dar ve kalın (genişlik %76, ağırlık 800), tabela yazısı gibi. Gövde normal genişlikte (400), vurgular 500 ve 600. Sunucudan yayınlanır (`public/fonts/`), Google'a istek atılmaz. Lisans: SIL Open Font License 1.1 (`public/fonts/OFL.txt`). Türkçe karakterler (ğ, ş, ı, İ) için `latin` ve `latin-ext` alt kümeleri yüklüdür.
 
 Kaçınılan kalıplar: başlıkta tek kelimeyi vurgulamak, büyük harfli üst etiketler, aynı kartların tekrarı, gradyan yıkamalar.
 
 ## Düzen
 
-Sola dayalı, asimetrik, bol boşluklu. Bölümler iki sütundur: solda başlık, sağda içerik. Yapı, kart yerine ince çizgilerle kurulur. Numara yalnızca gerçekten sıralı olan "Nasıl çalışır" adımlarında vardır.
+Sola dayalı, geniş boşluklu. Yapı, kart yığını yerine ince çizgilerle ve işe uygun iki bileşenle kurulur:
 
-Tek çarpıcı öğe hero'daki bordo kemerdir. İçinde örnek konuşma, balonlarla değil düzgün dizilmiş bir yazışma metni olarak akar. Kemerin etrafındaki ince dış çizgi, logonun iç içe kemerlerini sayfaya taşır.
+- **İş fişi:** Kenarı tırtıklı, üstü tezgâh yeşili şeritli beyaz kâğıt. Hero'da ustaya bırakılan işi, sayfa sonunda talep formunu taşır.
+- **Kim neye bakar:** İki sütun. Solda beyaz "Kalfa'ya gider", sağda yeşil "Ustaya gider". Hizmetin devir kuralı tek bakışta görülür.
 
-## Ses
+Numara yalnızca gerçekten sıralı olan "Bir iş nasıl yürür" adımlarında vardır.
 
-Sade, somut ve saygılı konuşur. Eylemi adıyla söyler ("Talebi gönder"). Hata mesajı ne olduğunu ve ne yapılacağını söyler, özür dilemez. Övünmez, rakam uydurmaz.
+## Dil
+
+Hizmetin diliyle konuşur: kalfa, usta, iş fişi, defter, tezgâh. Sade, somut ve saygılı. Eylemi adıyla söyler ("Talebi gönder"). Hata mesajı ne olduğunu ve ne yapılacağını söyler, özür dilemez. Övünmez, rakam uydurmaz. "Kalfa" marka adı olduğu için ek alırken kesme işareti kullanılır (Kalfa'ya, Kalfa'nın); "usta" genel ad olduğu için kullanılmaz (ustaya).
 
 ## Hareket
 
-Sayfa açılırken tek bir sahne oynar: kemer aşağıdan yükselir, başlık kelime kelime gelir, ardından konuşma başlar ve Antre cevap yazarken önce "yazıyor" noktalarını gösterir. Bunun dışında yalnızca bir eyleme cevap veren küçük hareketler vardır:
+Sayfa açılırken tek bir sahne oynar ve bu sahne ürünün gerçek işini anlatır: başlık gelir, örnek konuşma oynar (Kalfa cevap yazarken önce "yazıyor" noktalarını gösterir), sonra **iş fişi yukarıdan düşer ve üstüne "Ustaya devredildi" mührü basılır**. Bunun dışında yalnızca bir eyleme cevap veren küçük hareketler vardır:
 
 | Hareket | Ne anlatır |
 |---|---|
-| "Nasıl çalışır" çizgisi kaydırınca çizilir | Sıralı bir süreç |
-| Hizmet satırı üzerine gelince kayar, başlığı bordoya döner | Satırın seçilebildiği |
+| "Bir iş nasıl yürür" çizgisi kaydırınca çizilir | Sıralı bir süreç |
+| Hizmet satırı üzerine gelince kayar, başlığı yeşile döner | Satırın seçilebildiği |
 | Bağlantı altı çizgisi kalınlaşır | Tıklanabilirlik |
 | Düğme basınca 1 px iner | Dokunmanın algılandığı |
-| Başarı işareti: önce kemer çizilir, sonra onay | Kaydın gerçekten yapıldığı |
+| Başarı işareti çizilir | Kaydın gerçekten yapıldığı |
 
-Kurallar: Yalnızca `transform`, `opacity` ve `clip-path` animasyonlanır. `prefers-reduced-motion: reduce` seçiliyse hiçbir şey hareket etmez ve her içerik hemen görünür. Hareket kodu hata verirse sayfa hareketsiz ve tam görünür kalır.
+Kurallar: Yalnızca `transform` ve `opacity` animasyonlanır. `prefers-reduced-motion: reduce` seçiliyse hiçbir şey hareket etmez, fiş ve mühür baştan yerindedir. Hareket kodu hata verirse sayfa hareketsiz ve tam görünür kalır.

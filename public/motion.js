@@ -36,16 +36,16 @@
     if (steps) observeOnce([steps], { threshold: 0.4 }, function (el) { el.classList.add('in-view'); });
   }
 
-  // Konuşma: müşteri satırı belirir, Antre önce "yazıyor" noktalarını gösterir, sonra cevabı açılır.
+  // Konuşma: müşteri satırı belirir, Kalfa önce "yazıyor" noktalarını gösterir, sonra cevabı açılır.
   function initChat() {
     var log = document.querySelector('.chat-log');
     if (!log) return;
     if (reduced) { document.body.setAttribute('data-chat-done', '1'); return; }
 
     var msgs = Array.prototype.slice.call(log.children);
-    // [önce bekle (ms), yazıyor süresi (ms), satır]. İlk bekleme, kemerin yükselmesini bitirmesi içindir.
+    // [önce bekle (ms), yazıyor süresi (ms), satır]. İlk bekleme, başlığın gelmesine zaman tanır.
     var script = [
-      [1500, 0, msgs[0]],
+      [900, 0, msgs[0]],
       [900, 1200, msgs[1]],
       [1300, 0, msgs[2]],
       [900, 1500, msgs[3]],
@@ -64,7 +64,11 @@
           el.classList.add('show');
         });
       });
-      return chain.then(function () { document.body.setAttribute('data-chat-done', '1'); });
+      // Son satır iş fişidir: düşer, ardından mühür basılır.
+      return chain.then(function () { return sleep(550); }).then(function () {
+        msgs[msgs.length - 1].classList.add('stamped');
+        return sleep(400);
+      }).then(function () { document.body.setAttribute('data-chat-done', '1'); });
     }
 
     var started = false;

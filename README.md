@@ -1,4 +1,4 @@
-# Antre
+# Kalfa
 
 Küçük işletmeler için kurgusal bir müşteri destek asistanı hizmetinin landing page'i ve talep formu. Ziyaretçinin talebi sunucuda kalıcı bir kayda dönüşür. Bu bir değerlendirme çalışmasıdır, yalnızca kurgusal test verisi kullanılmalıdır.
 
@@ -10,7 +10,7 @@ Sayfa hizmeti anlatır. Gerçek bir yapay zekâ ya da otomasyon çalışmaz, ça
 ## Ne yapar
 
 - Mobil ve masaüstünde çalışan tek sayfa: sorun, nasıl çalışır, hizmetler, talep formu. Marka kimliği (logo, renk paleti, yazı tipi, hareket kuralları) [BRAND.md](BRAND.md) dosyasındadır.
-- Tek açılış sahnesi (kemer yükselir, başlık gelir, örnek konuşma yazılır), çizilen adım çizgisi ve kendini çizen başarı işareti. "Hareketi azalt" seçiliyse hareket kapanır.
+- Tek açılış sahnesi: başlık gelir, örnek konuşma oynar, ardından iş fişi düşer ve üstüne "Ustaya devredildi" mührü basılır. Ayrıca çizilen adım çizgisi ve kendini çizen başarı işareti. "Hareketi azalt" seçiliyse hareket kapanır.
 - Form: ad, e-posta, hizmet seçimi, açıklama.
 - Aynı doğrulama kuralları hem tarayıcıda hem sunucuda çalışır (`public/validation.js` tek dosyadır, ikisi de onu kullanır). İstemci doğrulaması yalnızca kolaylıktır, güvenlik sunucudadır.
 - Gönderiliyor, başarı, alan hatası, sunucu hatası, zaman aşımı ve ağ kesintisi durumları ayrı ayrı ele alınır.
@@ -18,7 +18,7 @@ Sayfa hizmeti anlatır. Gerçek bir yapay zekâ ya da otomasyon çalışmaz, ça
 
 ## Teknoloji
 
-Node.js, Express 5, PostgreSQL, sade HTML/CSS/JS (framework yok). Hazır bir şablon kullanılmadı, tüm kod bu depoda yazıldı. Tek üçüncü taraf varlık, sunucudan yayınlanan Jost yazı tipidir (SIL OFL 1.1, lisansı `public/fonts/OFL.txt`).
+Node.js, Express 5, PostgreSQL, sade HTML/CSS/JS (framework yok). Hazır bir şablon kullanılmadı, tüm kod bu depoda yazıldı. Tek üçüncü taraf varlık, sunucudan yayınlanan Archivo yazı tipidir (SIL OFL 1.1, lisansı `public/fonts/OFL.txt`).
 
 Veri tabanı iki modda çalışır ve SQL aynıdır:
 - `DATABASE_URL` tanımlıysa PostgreSQL (canlı ortam).
@@ -52,13 +52,13 @@ curl -H "x-admin-token: gizli-bir-deger" http://localhost:3000/api/requests
 
 ```bash
 npm test                       # 29 sunucu testi (node:test)
-python3 tests/e2e.py           # 40 tarayıcı kontrolü, sunucu çalışırken
+python3 tests/e2e.py           # 41 tarayıcı kontrolü, sunucu çalışırken
 ```
 
 Tarayıcı testi için bir kerelik kurulum: `python3 -m pip install playwright && python3 -m playwright install chromium`. Test sonunda `shots/` klasörüne ekran görüntüleri yazar.
 
 Sunucu testleri: geçerli ve geçersiz girdiler (sınır değerler dahil), kaydın gerçekten yazılması, SQL enjeksiyon denemesi, bozuk ve aşırı büyük gövde, veri tabanı hatasında başarı dönmemesi, hız sınırı, yönetici ucunun korunması, güvenlik başlıkları.
-Tarayıcı testi: dört ekran genişliğinde yatay taşma ve konsol hatası, hatalı ve başarılı gönderim, sunucu 500 dönünce başarı mesajının çıkmaması, ağ kesintisi, çift tıklama, klavye ile kullanım, "hareketi azalt" modunda durağan sayfa, kemerin açılışı, Antre'nin "yazıyor" durumu, adım çizgisinin çizilmesi, başarı işaretinin çizilmesi.
+Tarayıcı testi: dört ekran genişliğinde yatay taşma ve konsol hatası, hatalı ve başarılı gönderim, sunucu 500 dönünce başarı mesajının çıkmaması, ağ kesintisi, çift tıklama, klavye ile kullanım, "hareketi azalt" modunda durağan sayfa, kemerin açılışı, Kalfa'nin "yazıyor" durumu, adım çizgisinin çizilmesi, başarı işaretinin çizilmesi.
 
 ## Güvenlik önlemleri
 

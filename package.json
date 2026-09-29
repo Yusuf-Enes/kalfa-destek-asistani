@@ -1,7 +1,7 @@
 {
-  "name": "antre",
+  "name": "kalfa",
   "version": "1.0.0",
-  "description": "Antre: kurgusal müşteri destek asistanı landing page ve talep formu",
+  "description": "Kalfa: kurgusal müşteri destek asistanı landing page ve talep formu",
   "main": "index.js",
   "directories": {
     "test": "tests"
