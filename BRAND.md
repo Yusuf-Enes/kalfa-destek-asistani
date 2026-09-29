@@ -1,60 +1,73 @@
-# Destekçi marka rehberi
+# Antre marka rehberi
 
 ## Fikir
 
-Destekçi, küçük işletmelerin müşteri sorularını yanıtlayan bir asistandır. Marka bir **konuşmayı** anlatır: kısa, net ve güven veren. Kurgusal bir hizmettir.
+**Antre**, bir binanın giriş holü demektir. Hizmet de tam olarak bunu yapar: müşteriyi kapıda karşılar, sık sorulan sorulara yanıt verir, özen ya da onay gerektiren konuları içeri, ekibe taşır. Kurgusal bir hizmettir.
+
+Marka bir **eşiği** anlatır. Bu yüzden tek görsel dil kemerdir (kapı açıklığı). Sayfadaki tek yuvarlak biçim kemerdir, geri kalan her şey köşelidir (köşe yarıçapı 2 px).
 
 ## Logo
 
-**Simge:** "D" harfi biçiminde bir konuşma balonu. Balonun içindeki sarı nokta "cevap verildi" anlamına gelir. Simge, sola dayalı düz bir kenar ve sağda yuvarlak bir gövdeden oluşur, kuyruğu sol altta durur.
+**Simge:** İç içe iki kemer ve bir zemin çizgisi. Dıştaki ince çizgiyle çizilmiş bir kapı açıklığı, içteki dolu kemer o kapıda duran kişidir.
 
-**Yazı:** "Destekçi" adı Bricolage Grotesque 800 ile yazılır, harf aralığı sıkıdır (-0.03em).
+| Kullanım | Renk |
+|---|---|
+| Açık zemin | Bordo `#6A1B31` |
+| Bordo zemin (kemer içinde) | Gül `#D9C2C7` |
+| Koyu bordo zemin (alt bilgi) | Kâğıt `#F7F7F4` |
 
-| Kullanım | Balon | Nokta |
-|---|---|---|
-| Açık zemin | Kobalt `#2540F0` | Güneş sarısı `#FFC93C` |
-| Koyu zemin | Beyaz `#FFFFFF` | Kobalt `#2540F0` |
+**Yazı:** "Antre", Jost 500, harf aralığı +0.01em.
 
-Neden ters çevrildi: kobalt, koyu lacivert üstünde yalnızca 2,58:1 kontrast verir. Bu yüzden koyu zeminde balon beyaz olur, nokta kobalt kalır (beyaz üstünde 6,84:1).
+**Dosyalar:** `public/logo.svg` (simge), `public/favicon.svg` (sekme simgesi). Sayfadaki logolar satır içi SVG'dir, böylece rengi bağlama göre CSS ile değişir. Üzerine gelince iç kemer hafifçe yükselir (kapı aralanır).
 
-**Dosyalar:** `public/logo.svg` (simge), `public/favicon.svg` (sekme simgesi). Sayfadaki logo satır içi SVG'dir, böylece renkleri CSS ile değişir ve üzerine gelince nokta zıplar.
-
-**Kurallar:** Simgenin çevresinde en az balon genişliğinin yarısı kadar boşluk bırakın. Simgeyi eğmeyin, gölge eklemeyin, renklerini bu tablo dışında değiştirmeyin. En küçük kullanım genişliği 16 px.
+**Kurallar:** Simgenin çevresinde en az simge genişliği kadar boşluk bırakın. Eğmeyin, gölge eklemeyin, dolgusunu değiştirmeyin. En küçük kullanım genişliği 16 px.
 
 ## Renk paleti
 
 | Ad | Değer | Rol |
 |---|---|---|
-| Gece lacivert | `#0D1830` | Koyu zemin, ana metin |
-| Kart lacivert | `#15224A` | Koyu zemindeki kartlar |
-| Kobalt | `#2540F0` | Ana marka rengi, düğmeler, asistan balonları |
-| Kobalt koyu | `#1B31C4` | Düğme üzerine gelme durumu |
-| Güneş sarısı | `#FFC93C` | Vurgu: koyu zeminde düğme, ilerleme çubuğu, "devredildi" işareti |
-| Sis | `#EEF1FB` | Açık zemin |
-| Soluk metin | `#4A5578` | İkincil metin (açık zeminde) |
-| Koyu zeminde soluk | `#B9C3E6` | İkincil metin (koyu zeminde) |
-| Hata | `#B3261E` | Yalnızca hata mesajları |
+| Kireç | `#E9EAE6` | Ana zemin |
+| Kireç koyu | `#DEDFDA` | Form bölümü zemini |
+| Kâğıt | `#F7F7F4` | Yüzeyler (form paneli, "Nasıl çalışır" bölümü) |
+| Şarap mürekkebi | `#26121A` | Metin |
+| Bordo | `#6A1B31` | Marka rengi: kemer, düğme, bağlantı |
+| Koyu bordo | `#4A1122` | Alt bilgi, düğme üzerine gelme |
+| Gül | `#D9C2C7` | Bordo zeminde ikincil metin |
+| Soluk metin | `#5E5459` | İkincil metin |
+| Hata | `#A8261D` | Yalnızca hata mesajları |
+
+Renk seçimi bilinçlidir: koyu lacivert ve sarı, krem ve toprak rengi, siyah ve canlı yeşil gibi yapay zekâ ve SaaS sayfalarında sık görülen ikililer kullanılmadı. Bordo ve kireç, otel ve özel kulüp dünyasından gelir.
 
 ### Kontrast (WCAG, hesaplanmış değerler)
 
-| Çift | Oran | Kullanım |
-|---|---|---|
-| Beyaz / kobalt | 6,84 | Düğme, asistan balonu, şerit |
-| Beyaz / kobalt koyu | 9,20 | Düğme üzerine gelme |
-| Lacivert / sarı | 11,48 | Sarı düğme |
-| Beyaz / lacivert | 17,64 | Koyu zemindeki metin |
-| Koyu zemin soluk / lacivert | 10,09 | Koyu zemindeki ikincil metin |
-| Lacivert / sis | 15,63 | Açık zemindeki metin |
-| Soluk metin / sis | 6,50 | Açık zemindeki ikincil metin |
-| Soluk metin / beyaz | 7,34 | Beyaz üzerinde ikincil metin |
-| Hata / beyaz | 6,54 | Hata mesajı |
-| Form çerçevesi `#7583A8` / beyaz | 3,77 | Alan çerçevesi (grafik için en az 3) |
-| Kobalt / lacivert | **2,58** | **Metin için kullanılmaz.** Yalnızca dolgu olarak, üstüne beyaz yazıyla. |
+| Çift | Oran |
+|---|---|
+| Metin / kireç | 14,68 |
+| Metin / kâğıt | 16,53 |
+| Metin / kireç koyu | 13,24 |
+| Soluk metin / kireç | 6,02 |
+| Soluk metin / kâğıt | 6,77 |
+| Soluk metin / kireç koyu | 5,43 |
+| Bordo / kireç (bağlantı, başlık numaraları) | 9,58 |
+| Kâğıt / bordo (düğme, Antre satırları) | 10,79 |
+| Gül / bordo (etiketler) | 6,89 |
+| Gül-yumuşak `#ECDDE0` / bordo (müşteri satırları) | 8,81 |
+| Gül / koyu bordo (alt bilgi) | 8,96 |
+| Hata / kâğıt | 6,61 |
+| Hata / hata zemini | 6,18 |
+| Form çerçevesi `#8A8083` / kâğıt (grafik için en az 3) | 3,56 |
 
 ## Yazı tipi
 
-- **Başlıklar ve logo yazısı:** Bricolage Grotesque, ağırlık 700–800. Sunucudan yayınlanır (`public/fonts/`), Google'a istek atılmaz. Lisans: SIL Open Font License 1.1 (`public/fonts/OFL.txt`). Türkçe karakterler (ğ, ş, ı, İ) için `latin` ve `latin-ext` alt kümeleri yüklüdür.
-- **Gövde metni:** Sistem yazı tipi. Hızlı yüklenir ve okunaklıdır.
+**Jost**, tek aile. Geometrik ve sakin, kemer biçimiyle uyumlu. Başlıklar büyük ve ince (300), gövde normal (400), vurgular 500. Sunucudan yayınlanır (`public/fonts/`), Google'a istek atılmaz. Lisans: SIL Open Font License 1.1 (`public/fonts/OFL.txt`). Türkçe karakterler (ğ, ş, ı, İ) için `latin` ve `latin-ext` alt kümeleri yüklüdür.
+
+Kaçınılan kalıplar: başlıkta tek kelimeyi vurgulamak, büyük harfli üst etiketler, aynı kartların tekrarı, gradyan yıkamalar.
+
+## Düzen
+
+Sola dayalı, asimetrik, bol boşluklu. Bölümler iki sütundur: solda başlık, sağda içerik. Yapı, kart yerine ince çizgilerle kurulur. Numara yalnızca gerçekten sıralı olan "Nasıl çalışır" adımlarında vardır.
+
+Tek çarpıcı öğe hero'daki bordo kemerdir. İçinde örnek konuşma, balonlarla değil düzgün dizilmiş bir yazışma metni olarak akar. Kemerin etrafındaki ince dış çizgi, logonun iç içe kemerlerini sayfaya taşır.
 
 ## Ses
 
@@ -62,15 +75,14 @@ Sade, somut ve saygılı konuşur. Eylemi adıyla söyler ("Talebi gönder"). Ha
 
 ## Hareket
 
-Hareket bir şey anlatıyorsa vardır:
+Sayfa açılırken tek bir sahne oynar: kemer aşağıdan yükselir, başlık kelime kelime gelir, ardından konuşma başlar ve Antre cevap yazarken önce "yazıyor" noktalarını gösterir. Bunun dışında yalnızca bir eyleme cevap veren küçük hareketler vardır:
 
 | Hareket | Ne anlatır |
 |---|---|
-| Başlık kelime kelime yükselir | Sayfanın tek açılış anı |
-| Asistan önce "yazıyor" noktalarını gösterir | Konuşmanın canlı olduğu |
-| Adımların çizgisi çizilir, daireler sırayla dolar | Sıralı bir süreç |
-| Soru şeridi akar | Müşterilerin gerçek soruları |
-| Başarı işareti kendini çizer | Kaydın gerçekten yapıldığı |
-| Düğme basınca tepki verir | Dokunmanın algılandığı |
+| "Nasıl çalışır" çizgisi kaydırınca çizilir | Sıralı bir süreç |
+| Hizmet satırı üzerine gelince kayar, başlığı bordoya döner | Satırın seçilebildiği |
+| Bağlantı altı çizgisi kalınlaşır | Tıklanabilirlik |
+| Düğme basınca 1 px iner | Dokunmanın algılandığı |
+| Başarı işareti: önce kemer çizilir, sonra onay | Kaydın gerçekten yapıldığı |
 
-Kurallar: Yalnızca `transform` ve `opacity` animasyonlanır. `prefers-reduced-motion: reduce` seçiliyse hiçbir şey hareket etmez ve her içerik hemen görünür. Akan şeritte "Akışı durdur" düğmesi vardır. Hareket kodu hata verirse sayfa hareketsiz ve tam görünür kalır.
+Kurallar: Yalnızca `transform`, `opacity` ve `clip-path` animasyonlanır. `prefers-reduced-motion: reduce` seçiliyse hiçbir şey hareket etmez ve her içerik hemen görünür. Hareket kodu hata verirse sayfa hareketsiz ve tam görünür kalır.

@@ -3,101 +3,90 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Destekçi · Müşteri destek asistanı</title>
-  <meta name="description" content="Destekçi, küçük işletmelerde sık sorulan müşteri sorularını yanıtlar; yanıtlayamadıklarını ekibinize devreder. Kurgusal bir hizmet sayfasıdır.">
-  <meta name="theme-color" content="#0D1830">
+  <title>Antre · Müşteri destek asistanı</title>
+  <meta name="description" content="Antre, işletmenizin sık sorulan müşteri sorularını yanıtlar; onay ya da özen gerektiren konuları ekibinize devreder. Kurgusal bir hizmet sayfasıdır.">
+  <meta name="theme-color" content="#E9EAE6">
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="preload" href="/fonts/bricolage-latin.woff2" as="font" type="font/woff2" crossorigin>
-  <link rel="preload" href="/fonts/bricolage-latin-ext.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/jost-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="/fonts/jost-latin-ext.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="/styles.css">
   <script src="/motion.js"></script>
 </head>
 <body>
   <a class="skip" href="#talep">Talep formuna geç</a>
 
-  <header class="site-header on-dark">
+  <header class="site-header">
     <div class="wrap bar">
-      <a class="brand" href="/" aria-label="Destekçi ana sayfa">
-        <svg class="logo-mark" viewBox="0 0 44 52" aria-hidden="true" focusable="false">
-          <path class="bubble" d="M6 4H24A18 18 0 0 1 24 40H16L6 48Z"/>
-          <circle class="dot" cx="24" cy="22" r="5.5"/>
+      <a class="brand" href="/" aria-label="Antre ana sayfa">
+        <svg class="logo-mark" viewBox="0 0 40 48" aria-hidden="true" focusable="false">
+          <path class="arch-outer" d="M5 45V20a15 15 0 0 1 30 0v25"/>
+          <path class="arch-inner" d="M14 45V25a6 6 0 0 1 12 0v20Z"/>
+          <path class="arch-ground" d="M2 45h36"/>
         </svg>
-        <span class="wordmark">Destekçi</span>
+        <span class="wordmark">Antre</span>
       </a>
-      <a class="btn btn-sun btn-small" href="#talep">Talep oluştur</a>
+      <nav class="nav" aria-label="Sayfa bölümleri">
+        <a href="#nasil">Nasıl çalışır</a>
+        <a href="#hizmetler">Hizmetler</a>
+      </nav>
+      <a class="btn btn-line btn-small" href="#talep">Talep oluştur</a>
     </div>
-    <div class="progress" aria-hidden="true"></div>
   </header>
 
   <main>
-    <section class="hero on-dark" aria-labelledby="hero-title">
+    <section class="hero" aria-labelledby="hero-title">
       <div class="wrap hero-grid">
         <div class="hero-copy">
-          <h1 id="hero-title"><span class="w"><span>Aynı</span></span> <span class="w"><span>soruya</span></span> <span class="w"><span>yüzüncü</span></span> <span class="w"><span>kez</span></span> <span class="w"><span>cevap</span></span> <span class="w"><span>yazmayın.</span></span></h1>
-          <p class="lead">Destekçi, müşterilerinizin sık sorduğu soruları sizin yerinize yanıtlar. Yanıtlayamadığı ya da sizin onayınızı gerektiren konuları ekibinize devreder.</p>
+          <h1 id="hero-title"><span class="w"><span>Kapıyı</span></span> <span class="w"><span>sizin</span></span> <span class="w"><span>yerinize</span></span> <span class="w"><span>açar.</span></span></h1>
+          <p class="lead">Antre, müşterilerinizin sık sorduğu soruları yanıtlar. Onay ya da özen gerektiren konuları, konuşmanın özetiyle birlikte size devreder.</p>
           <div class="cta-row">
-            <a class="btn btn-sun" href="#talep">Talep oluştur</a>
-            <p class="fine">Kurgusal bir hizmettir. Formda gerçek kişisel bilgi yazmayın.</p>
+            <a class="btn" href="#talep">Talep oluştur</a>
+            <a class="text-link" href="#ornek">Örnek konuşmayı görün</a>
           </div>
+          <p class="fine">Kurgusal bir hizmettir. Formda gerçek kişisel bilgi yazmayın.</p>
         </div>
 
-        <figure class="chat" aria-label="Örnek müşteri konuşması">
+        <figure class="arch chat" id="ornek" aria-label="Örnek müşteri konuşması">
+          <svg class="logo-mark arch-emblem" viewBox="0 0 40 48" aria-hidden="true" focusable="false">
+            <path class="arch-outer" d="M5 45V20a15 15 0 0 1 30 0v25"/>
+            <path class="arch-inner" d="M14 45V25a6 6 0 0 1 12 0v20Z"/>
+            <path class="arch-ground" d="M2 45h36"/>
+          </svg>
           <figcaption class="chat-caption">Örnek konuşma</figcaption>
           <ol class="chat-log">
-            <li class="msg msg-customer"><span class="who">Müşteri</span>Siparişim ne zaman gelir? Sipariş no: 4821</li>
-            <li class="msg msg-bot"><span class="who">Destekçi</span>4821 numaralı siparişiniz dün kargoya verildi. Tahmini teslim perşembe. Takip kodunu e-postanıza gönderdim.</li>
-            <li class="msg msg-customer"><span class="who">Müşteri</span>Başka bir üründen vazgeçtim, iade etmek istiyorum.</li>
-            <li class="msg msg-bot"><span class="who">Destekçi</span>İade talebinizi not aldım. Bu konuyu ekibimiz onaylıyor. En geç yarın size e-postayla dönecekler.</li>
-            <li class="msg msg-note"><span class="who">Ekibe devredildi</span>İade talebi · sipariş 4830 · onay bekliyor</li>
+            <li class="msg msg-customer"><span class="who">Müşteri</span><span class="txt">Siparişim ne zaman gelir? Sipariş no: 4821</span></li>
+            <li class="msg msg-bot"><span class="who">Antre</span><span class="txt">4821 numaralı siparişiniz dün kargoya verildi. Tahmini teslim perşembe. Takip kodunu e-postanıza gönderdim.</span></li>
+            <li class="msg msg-customer"><span class="who">Müşteri</span><span class="txt">Başka bir üründen vazgeçtim, iade etmek istiyorum.</span></li>
+            <li class="msg msg-bot"><span class="who">Antre</span><span class="txt">İade talebinizi not aldım. Bu konuyu ekibimiz onaylıyor. En geç yarın size e-postayla dönecekler.</span></li>
+            <li class="msg msg-note"><span class="who">Ekibe devredildi</span><span class="txt">İade talebi, sipariş 4830. Onayınız bekleniyor.</span></li>
           </ol>
         </figure>
       </div>
     </section>
 
-    <section class="ticker" id="ticker" aria-label="Müşterilerin en sık sorduğu sorulardan örnekler">
-      <div class="ticker-viewport">
-        <ul class="ticker-track">
-          <li>Siparişim nerede?</li>
-          <li>İade nasıl yapılır?</li>
-          <li>Kaça kadar açıksınız?</li>
-          <li>Kargo ücretli mi?</li>
-          <li>Faturamı nasıl alırım?</li>
-          <li>Ürün stokta var mı?</li>
-          <li>Adresimi değiştirebilir miyim?</li>
-          <li>Taksit yapıyor musunuz?</li>
-        </ul>
-        <ul class="ticker-track ticker-copy" aria-hidden="true">
-          <li>Siparişim nerede?</li>
-          <li>İade nasıl yapılır?</li>
-          <li>Kaça kadar açıksınız?</li>
-          <li>Kargo ücretli mi?</li>
-          <li>Faturamı nasıl alırım?</li>
-          <li>Ürün stokta var mı?</li>
-          <li>Adresimi değiştirebilir miyim?</li>
-          <li>Taksit yapıyor musunuz?</li>
-        </ul>
-      </div>
-      <button class="ticker-toggle" id="ticker-toggle" type="button" aria-pressed="false" hidden>Akışı durdur</button>
-    </section>
-
-    <section class="problem" aria-labelledby="problem-title">
-      <div class="wrap narrow" data-reveal="0">
+    <section class="statement" aria-labelledby="problem-title">
+      <div class="wrap statement-grid">
         <h2 id="problem-title">Destek, küçük ekiplerin mesaisini yer.</h2>
-        <p>Gelen mesajların çoğu birbirine benzer: kargo nerede, iade nasıl yapılır, hangi saatlerde açıksınız. Bunlara elle cevap yazarken asıl işiniz bekler, karmaşık bir müşteri sorusu da sırada kaybolur.</p>
-        <p>Destekçi bu tekrar eden soruları üstlenir. Siz yalnızca gerçekten sizin ilginizi isteyen konularla ilgilenirsiniz.</p>
+        <div class="statement-body">
+          <p>Gelen mesajların çoğu birbirine benzer: kargo nerede, iade nasıl yapılır, hangi saatlerde açıksınız. Bunlara elle cevap yazarken asıl işiniz bekler, karmaşık bir müşteri sorusu da sırada kaybolur.</p>
+          <p>Antre bu tekrar eden soruları üstlenir. Siz yalnızca gerçekten sizin ilginizi isteyen konularla ilgilenirsiniz.</p>
+        </div>
       </div>
     </section>
 
-    <section class="how" aria-labelledby="steps-title">
-      <div class="wrap">
-        <h2 id="steps-title">Nasıl çalışır</h2>
+    <section class="how" id="nasil" aria-labelledby="steps-title">
+      <div class="wrap how-grid">
+        <div class="how-intro">
+          <h2 id="steps-title">Nasıl çalışır</h2>
+          <p>Kurulum üç adımdır. Sonrasında müşteriniz kapıda karşılanır, siz yalnızca içeri gelmesi gerekenlerle ilgilenirsiniz.</p>
+        </div>
         <ol class="steps" id="steps">
           <li>
             <h3>Sık sorularınızı ekleyin</h3>
             <p>Kargo, iade, çalışma saatleri gibi konulardaki cevaplarınızı bir kez yazarsınız.</p>
           </li>
           <li>
-            <h3>Destekçi müşterilere yanıt verir</h3>
+            <h3>Antre müşterilere yanıt verir</h3>
             <p>Gelen soruyu anlar, ilgili cevabı müşterinin diliyle iletir.</p>
           </li>
           <li>
@@ -108,19 +97,19 @@
       </div>
     </section>
 
-    <section class="services-band" aria-labelledby="services-title">
+    <section class="services-band" id="hizmetler" aria-labelledby="services-title">
       <div class="wrap">
         <h2 id="services-title">Üç şekilde kullanabilirsiniz</h2>
         <dl class="services">
-          <div data-reveal="0">
+          <div>
             <dt>SSS botu</dt>
             <dd>Web sitenizdeki sık sorulan soruları müşterinin yazdığı cümleyle eşleştirip yanıtlar.</dd>
           </div>
-          <div data-reveal="1">
+          <div>
             <dt>E-posta cevap taslakları</dt>
             <dd>Gelen e-postalara hazır bir taslak yazar. Göndermeden önce siz okur ve düzeltirsiniz.</dd>
           </div>
-          <div data-reveal="2">
+          <div>
             <dt>Canlı sohbet asistanı</dt>
             <dd>Sitenizdeki sohbet kutusunda müşteriyle konuşur, gerektiğinde konuşmayı size aktarır.</dd>
           </div>
@@ -128,7 +117,7 @@
       </div>
     </section>
 
-    <section class="form-band on-dark" id="talep" aria-labelledby="form-title" tabindex="-1">
+    <section class="form-band" id="talep" aria-labelledby="form-title" tabindex="-1">
       <div class="wrap form-grid">
         <div class="form-intro">
           <h2 id="form-title">Talep oluşturun</h2>
@@ -136,7 +125,7 @@
           <p class="fine">Bu bir değerlendirme çalışmasıdır. Yalnızca kurgusal test verisi girin.</p>
         </div>
 
-        <div class="form-panel" data-reveal="1">
+        <div class="form-panel">
           <form id="request-form" novalidate>
             <div class="field">
               <label for="name">Adınız</label>
@@ -175,9 +164,9 @@
           </form>
 
           <div id="success" class="success" role="status" tabindex="-1" hidden>
-            <svg class="check" viewBox="0 0 52 52" aria-hidden="true" focusable="false">
-              <circle class="check-circle" cx="26" cy="26" r="23"/>
-              <path class="check-mark" d="M15 27l8 8 15-17"/>
+            <svg class="check" viewBox="0 0 48 56" aria-hidden="true" focusable="false">
+              <path class="check-circle" d="M6 52V22a18 18 0 0 1 36 0v30"/>
+              <path class="check-mark" d="M16 32l6 6 11-13"/>
             </svg>
             <h3>Talebiniz kaydedildi</h3>
             <p>Talep numaranız: <strong id="success-id"></strong></p>
@@ -189,16 +178,17 @@
     </section>
   </main>
 
-  <footer class="site-footer on-dark">
+  <footer class="site-footer">
     <div class="wrap footer-bar">
       <span class="brand brand-static">
-        <svg class="logo-mark" viewBox="0 0 44 52" aria-hidden="true" focusable="false">
-          <path class="bubble" d="M6 4H24A18 18 0 0 1 24 40H16L6 48Z"/>
-          <circle class="dot" cx="24" cy="22" r="5.5"/>
+        <svg class="logo-mark" viewBox="0 0 40 48" aria-hidden="true" focusable="false">
+          <path class="arch-outer" d="M5 45V20a15 15 0 0 1 30 0v25"/>
+          <path class="arch-inner" d="M14 45V25a6 6 0 0 1 12 0v20Z"/>
+          <path class="arch-ground" d="M2 45h36"/>
         </svg>
-        <span class="wordmark">Destekçi</span>
+        <span class="wordmark">Antre</span>
       </span>
-      <p>Kurgusal bir hizmettir ve yalnızca bu değerlendirme için hazırlanmıştır.</p>
+      <p>Antre kurgusal bir hizmettir ve yalnızca bu değerlendirme için hazırlanmıştır.</p>
     </div>
   </footer>
 

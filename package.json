@@ -1,7 +1,7 @@
 {
-  "name": "destek-asistani",
+  "name": "antre",
   "version": "1.0.0",
-  "description": "Destekçi: kurgusal müşteri destek asistanı landing page ve talep formu",
+  "description": "Antre: kurgusal müşteri destek asistanı landing page ve talep formu",
   "main": "index.js",
   "directories": {
     "test": "tests"

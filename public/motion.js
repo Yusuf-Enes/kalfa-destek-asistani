@@ -30,51 +30,22 @@
     elements.forEach(function (el) { io.observe(el); });
   }
 
-  function initTicker() {
-    var ticker = document.getElementById('ticker');
-    var toggle = document.getElementById('ticker-toggle');
-    if (!ticker || !toggle || reduced) return;
-    toggle.hidden = false;
-    toggle.addEventListener('click', function () {
-      var paused = ticker.classList.toggle('is-paused');
-      toggle.setAttribute('aria-pressed', paused ? 'true' : 'false');
-      toggle.textContent = paused ? 'Akışı başlat' : 'Akışı durdur';
-    });
-  }
-
-  function initReveals() {
-    var items = Array.prototype.slice.call(document.querySelectorAll('[data-reveal]'));
-    observeOnce(items, { threshold: 0.15 }, function (el) { el.classList.add('is-visible'); });
+  // Adımların çizgisi, bölüm görünür olunca bir kez çizilir.
+  function initSteps() {
     var steps = document.getElementById('steps');
     if (steps) observeOnce([steps], { threshold: 0.4 }, function (el) { el.classList.add('in-view'); });
   }
 
-  function initProgress() {
-    var bar = document.querySelector('.progress');
-    if (!bar || reduced) return;
-    var ticking = false;
-    function update() {
-      var max = document.documentElement.scrollHeight - window.innerHeight;
-      var p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
-      bar.style.setProperty('--p', p.toFixed(4));
-      ticking = false;
-    }
-    window.addEventListener('scroll', function () {
-      if (!ticking) { ticking = true; requestAnimationFrame(update); }
-    }, { passive: true });
-    update();
-  }
-
-  // Konuşma: müşteri mesajı belirir, asistan önce "yazıyor" noktalarını gösterir, sonra cevabı açılır.
+  // Konuşma: müşteri satırı belirir, Antre önce "yazıyor" noktalarını gösterir, sonra cevabı açılır.
   function initChat() {
     var log = document.querySelector('.chat-log');
     if (!log) return;
     if (reduced) { document.body.setAttribute('data-chat-done', '1'); return; }
 
     var msgs = Array.prototype.slice.call(log.children);
-    // [önce bekle (ms), yazıyor süresi (ms), mesaj]
+    // [önce bekle (ms), yazıyor süresi (ms), satır]. İlk bekleme, kemerin yükselmesini bitirmesi içindir.
     var script = [
-      [500, 0, msgs[0]],
+      [1500, 0, msgs[0]],
       [900, 1200, msgs[1]],
       [1300, 0, msgs[2]],
       [900, 1500, msgs[3]],
@@ -107,9 +78,7 @@
 
   document.addEventListener('DOMContentLoaded', function () {
     try {
-      initTicker();
-      initReveals();
-      initProgress();
+      initSteps();
       initChat();
     } catch (e) {
       fallback();
