@@ -166,6 +166,8 @@ with sync_playwright() as p:
     check("hareketi azalt: tüm konuşma satırları hemen görünür", page.evaluate("[...document.querySelectorAll('.msg')].every(m => getComputedStyle(m).opacity === '1')"))
     check("hareketi azalt: başlık kelimeleri yerinde", page.evaluate("[...document.querySelectorAll('.hero h1 .w > span')].every(s => getComputedStyle(s).transform === 'none')"))
     check("hareketi azalt: mühür baştan görünür", page.evaluate("getComputedStyle(document.querySelector('.stamp')).opacity") == "1")
+    check("hareketi azalt: başlıklar, metin blokları ve iki sütun baştan görünür", page.evaluate("[...document.querySelectorAll('.reveal-title > span')].every(e => getComputedStyle(e).transform === 'none') && [...document.querySelectorAll('.rv, .split-col li, .services > div')].every(e => getComputedStyle(e).opacity === '1')"))
+    check("hareketi azalt: yeniden oynat düğmesi ve kaydırma çizgisi yok", page.locator(".replay").is_hidden() and page.evaluate("getComputedStyle(document.querySelector('.progress')).display") == "none")
     check("hareketi azalt: adım çizgileri tam görünür", page.evaluate("[...document.querySelectorAll('.steps li:not(:last-child)')].every(li => getComputedStyle(li, '::after').transform === 'none')"))
     ctx.close()
 
@@ -191,6 +193,63 @@ with sync_playwright() as p:
     page.locator("#steps").scroll_into_view_if_needed()
     page.wait_for_timeout(2500)
     check("hareket: adım çizgisi çizilir", page.evaluate("document.getElementById('steps').classList.contains('in-view') && getComputedStyle(document.querySelector('.steps li'), '::after').transform !== 'matrix(1, 0, 0, 0, 0, 0)'"))
+    ctx.close()
+
+    # ---- Hareket açıkken: bölümler kaydırınca gelir, yeniden oynat, kaydırma çizgisi
+    ctx = browser.new_context(viewport={"width": 1280, "height": 900})
+    page = ctx.new_page()
+    page.goto(BASE)
+    check("kaydırma: başlangıçta iki sütun gizli", page.evaluate("[...document.querySelectorAll('.split-col li')].every(e => getComputedStyle(e).opacity === '0')"))
+    check("kaydırma: kalfa'ya giden iş soldan (-28px), ustaya giden iş sağdan (+28px) başlar", page.evaluate("getComputedStyle(document.querySelector('.split-kalfa li')).transform === 'matrix(1, 0, 0, 1, -28, 0)' && getComputedStyle(document.querySelector('.split-usta li')).transform === 'matrix(1, 0, 0, 1, 28, 0)'"))
+    check("kaydırma: başlangıçta üst çubukta gölge yok", not page.evaluate("document.querySelector('.site-header').classList.contains('is-scrolled')"))
+    page.locator(".split-grid").scroll_into_view_if_needed()
+    page.wait_for_timeout(2200)
+    check("kaydırma: Kalfa'ya ve ustaya giden işler görünür", page.evaluate("document.querySelector('.split-grid').classList.contains('in-view') && [...document.querySelectorAll('.split-col li')].every(e => getComputedStyle(e).opacity === '1')"))
+    check("kaydırma: kaydırınca üst çubukta gölge", page.evaluate("document.querySelector('.site-header').classList.contains('is-scrolled')"))
+    page.evaluate("window.scrollTo({top: document.documentElement.scrollHeight, behavior: 'instant'})")
+    page.wait_for_timeout(500)
+    check("kaydırma: sayfa sonunda ilerleme çizgisi dolu", float(page.evaluate("getComputedStyle(document.querySelector('.progress')).getPropertyValue('--p')")) > 0.95)
+    check("kaydırma: sayfa sonunda ekran dışında kalan başlık henüz yükselmemiştir", page.evaluate("document.getElementById('form-title').getBoundingClientRect().bottom < 0 ? !document.getElementById('form-title').classList.contains('in-view') : true"))
+    page.locator("#form-title").scroll_into_view_if_needed()
+    page.wait_for_timeout(1300)
+    check("kaydırma: form başlığı görünür alana gelince yükselir", page.evaluate("document.getElementById('form-title').classList.contains('in-view') && getComputedStyle(document.querySelector('#form-title > span')).transform === 'none'"))
+
+    # Form açıklama ilerleme çizgisi
+    page.fill("#message", "12345")
+    check("ölçer: 5 karakterde yarısı dolu, henüz hedefte değil", page.evaluate("getComputedStyle(document.getElementById('message-meter')).getPropertyValue('--fill').trim()") == "0.500" and not page.evaluate("document.getElementById('message-meter').classList.contains('ok')"))
+    page.fill("#message", "123456789012")
+    check("ölçer: 10 karakteri geçince dolu ve yeşil", page.evaluate("getComputedStyle(document.getElementById('message-meter')).getPropertyValue('--fill').trim()") == "1.000" and page.evaluate("document.getElementById('message-meter').classList.contains('ok')"))
+    page.fill("#message", "")
+    check("ölçer: metin silinince boşalır", page.evaluate("getComputedStyle(document.getElementById('message-meter')).getPropertyValue('--fill').trim()") == "0.000")
+
+    # Konuşmayı yeniden oynat
+    page.evaluate("window.scrollTo({top: 0, behavior: 'instant'})")
+    page.wait_for_selector("body[data-chat-done='1']", timeout=25000)
+    check("yeniden oynat: konuşma bitince düğme görünür ve açık", page.locator(".replay").is_visible() and page.locator(".replay").is_enabled())
+    page.click(".replay")
+    check("yeniden oynat: tıklayınca düğme kapanır ve konuşma başa döner", page.locator(".replay").is_disabled() and page.evaluate("document.body.getAttribute('data-chat-done')") is None and page.evaluate("document.querySelector('.msg-note').classList.contains('stamped')") is False)
+    page.wait_for_selector("body[data-chat-done='1']", timeout=25000)
+    page.wait_for_timeout(700)
+    check("yeniden oynat: konuşma yeniden oynar, fiş düşer, mühür basılır", page.evaluate("document.querySelector('.msg-note').classList.contains('stamped') && getComputedStyle(document.querySelector('.stamp')).opacity === '1'"))
+    check("yeniden oynat: bitince düğme yeniden açılır", page.locator(".replay").is_enabled())
+    ctx.close()
+
+    # ---- Gönderirken düğmede şerit hareketi
+    ctx = browser.new_context()
+    page = ctx.new_page()
+    def slow_ok(route):
+        page.wait_for_timeout(900)
+        route.continue_()
+    page.route("**/api/requests", slow_ok)
+    page.goto(BASE)
+    fill_valid(page)
+    page.click("#submit-btn")
+    page.wait_for_timeout(250)
+    check("gönderirken: düğmede şerit hareketi ve devre dışı", page.evaluate("document.getElementById('submit-btn').classList.contains('is-sending')") and page.locator("#submit-btn").is_disabled())
+    page.wait_for_selector("#success:not([hidden])")
+    check("gönderince: şerit sınıfı kalkar", not page.evaluate("document.getElementById('submit-btn').classList.contains('is-sending')"))
+    page.wait_for_timeout(1300)
+    check("başarı kutusu fiş gibi basılır (sonunda tam görünür)", (lambda c: c == "none" or (c.startswith("inset(") and "100%" not in c))(page.evaluate("getComputedStyle(document.getElementById('success')).clipPath")))
     ctx.close()
 
     # ---- Başarı işareti gerçekten çiziliyor mu

@@ -32,6 +32,7 @@
       </nav>
       <a class="btn btn-small" href="#talep">Talep oluştur</a>
     </div>
+    <div class="progress" aria-hidden="true"></div>
   </header>
 
   <main>
@@ -48,7 +49,7 @@
         </div>
 
         <figure class="chat" id="ornek" aria-label="Örnek müşteri konuşması ve ustaya bırakılan iş fişi">
-          <figcaption class="chat-caption">Örnek konuşma</figcaption>
+          <figcaption class="chat-caption"><span>Örnek konuşma</span><button class="replay" type="button" aria-label="Konuşmayı yeniden oynat" hidden>Yeniden oynat</button></figcaption>
           <ol class="chat-log">
             <li class="msg msg-customer"><span class="who">Müşteri</span><span class="txt">Siparişim ne zaman gelir? Sipariş no: 4821</span></li>
             <li class="msg msg-bot"><span class="who">Kalfa</span><span class="txt">4821 numaralı siparişiniz dün kargoya verildi. Tahmini teslim perşembe. Takip kodunu e-postanıza gönderdim.</span></li>
@@ -74,8 +75,8 @@
 
     <section class="statement" aria-labelledby="problem-title">
       <div class="wrap statement-grid">
-        <h2 id="problem-title">Dükkân açıkken telefon susmaz.</h2>
-        <div class="statement-body">
+        <h2 id="problem-title" class="reveal-title"><span>Dükkân açıkken telefon susmaz.</span></h2>
+        <div class="statement-body rv">
           <p>Kargo nerede, iade nasıl yapılır, kaça kadar açıksınız. Aynı soruya her gün yeniden cevap vermek, işin başından ayrılmak demek. Karmaşık bir müşteri sorusu da sırada kaybolur.</p>
           <p>Kalfa tekrar eden sorulara bakar. Siz yalnızca sizin kararınızı isteyen işlerle ilgilenirsiniz.</p>
         </div>
@@ -84,7 +85,7 @@
 
     <section class="split" id="kim" aria-labelledby="split-title">
       <div class="wrap">
-        <h2 id="split-title">Kim neye bakar</h2>
+        <h2 id="split-title" class="reveal-title"><span>Kim neye bakar</span></h2>
         <div class="split-grid">
           <div class="split-col split-kalfa">
             <h3>Kalfa'ya gider</h3>
@@ -105,15 +106,15 @@
             </ul>
           </div>
         </div>
-        <p class="split-note">Ustaya giden her iş, konuşmanın özetiyle birlikte bir iş fişi olarak gelir. Müşteriye aynı sorular tekrar sorulmaz.</p>
+        <p class="split-note rv">Ustaya giden her iş, konuşmanın özetiyle birlikte bir iş fişi olarak gelir. Müşteriye aynı sorular tekrar sorulmaz.</p>
       </div>
     </section>
 
     <section class="how" id="nasil" aria-labelledby="steps-title">
       <div class="wrap how-grid">
         <div class="how-intro">
-          <h2 id="steps-title">Bir iş nasıl yürür</h2>
-          <p>Kurulum bir defa yapılır. Sonrasında dükkân açıkken kalfa tezgâhta durur.</p>
+          <h2 id="steps-title" class="reveal-title"><span>Bir iş nasıl yürür</span></h2>
+          <p class="rv">Kurulum bir defa yapılır. Sonrasında dükkân açıkken kalfa tezgâhta durur.</p>
         </div>
         <ol class="steps" id="steps">
           <li>
@@ -134,7 +135,7 @@
 
     <section class="services-band" id="hizmetler" aria-labelledby="services-title">
       <div class="wrap">
-        <h2 id="services-title">Kalfa'yı üç yerde çalıştırabilirsiniz</h2>
+        <h2 id="services-title" class="reveal-title"><span>Kalfa'yı üç yerde çalıştırabilirsiniz</span></h2>
         <dl class="services">
           <div>
             <dt>SSS botu</dt>
@@ -155,8 +156,8 @@
     <section class="form-band" id="talep" aria-labelledby="form-title" tabindex="-1">
       <div class="wrap form-grid">
         <div class="form-intro">
-          <h2 id="form-title">Talep oluşturun</h2>
-          <p>İşletmenizi ve ihtiyacınızı kısaca anlatın. Talebiniz kaydedilince size bir talep numarası veririz.</p>
+          <h2 id="form-title" class="reveal-title"><span>Talep oluşturun</span></h2>
+          <p class="rv">İşletmenizi ve ihtiyacınızı kısaca anlatın. Talebiniz kaydedilince size bir talep numarası veririz.</p>
           <p class="fine">Bu bir değerlendirme çalışmasıdır. Yalnızca kurgusal test verisi girin.</p>
         </div>
 
@@ -189,6 +190,7 @@
               <div class="field">
                 <label for="message">Ne yapmak istiyorsunuz?</label>
                 <textarea id="message" name="message" rows="5" maxlength="1000" required aria-describedby="message-hint message-error"></textarea>
+                <div class="meter" id="message-meter" aria-hidden="true"><span></span></div>
                 <p class="hint" id="message-hint"><span id="message-count">0</span> / 1000 karakter. En az 10 karakter yazın.</p>
                 <p class="error" id="message-error" hidden></p>
               </div>

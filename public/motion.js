@@ -8,6 +8,8 @@
   function fallback() {
     root.classList.remove('js-motion');
     if (document.body) document.body.setAttribute('data-chat-done', '1');
+    var replay = document.querySelector('.replay');
+    if (replay) replay.hidden = true;
   }
 
   function sleep(ms) {
@@ -30,32 +32,60 @@
     elements.forEach(function (el) { io.observe(el); });
   }
 
-  // Adımların çizgisi, bölüm görünür olunca bir kez çizilir.
-  function initSteps() {
+  function markInView(el) { el.classList.add('in-view'); }
+
+  // Bölümler görünür olunca bir kez oynar: başlıklar, metin blokları, iki sütun, hizmet satırları, adımlar.
+  function initReveals() {
+    function all(sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); }
+    observeOnce(all('.reveal-title'), { threshold: 0.4 }, markInView);
+    observeOnce(all('.rv'), { threshold: 0.2 }, markInView);
+    observeOnce(all('.split-grid, .services'), { threshold: 0.15 }, markInView);
     var steps = document.getElementById('steps');
-    if (steps) observeOnce([steps], { threshold: 0.4 }, function (el) { el.classList.add('in-view'); });
+    if (steps) observeOnce([steps], { threshold: 0.4 }, markInView);
+  }
+
+  // Üstte kaydırma çizgisi ve başlığa gölge.
+  function initScroll() {
+    var header = document.querySelector('.site-header');
+    var bar = document.querySelector('.progress');
+    var ticking = false;
+    function update() {
+      ticking = false;
+      if (header) header.classList.toggle('is-scrolled', window.scrollY > 8);
+      if (bar && !reduced) {
+        var max = document.documentElement.scrollHeight - window.innerHeight;
+        var p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
+        bar.style.setProperty('--p', p.toFixed(4));
+      }
+    }
+    window.addEventListener('scroll', function () {
+      if (!ticking) { ticking = true; requestAnimationFrame(update); }
+    }, { passive: true });
+    update();
   }
 
   // Konuşma: müşteri satırı belirir, Kalfa önce "yazıyor" noktalarını gösterir, sonra cevabı açılır.
+  // Son satır iş fişidir: düşer, ardından mühür basılır. Bitince "Yeniden oynat" düğmesi açılır.
   function initChat() {
     var log = document.querySelector('.chat-log');
     if (!log) return;
+    var replay = document.querySelector('.replay');
     if (reduced) { document.body.setAttribute('data-chat-done', '1'); return; }
 
     var msgs = Array.prototype.slice.call(log.children);
-    // [önce bekle (ms), yazıyor süresi (ms), satır]. İlk bekleme, başlığın gelmesine zaman tanır.
+    // [önce bekle (ms), yazıyor süresi (ms), satır]
     var script = [
-      [900, 0, msgs[0]],
+      [0, 0, msgs[0]],
       [900, 1200, msgs[1]],
       [1300, 0, msgs[2]],
       [900, 1500, msgs[3]],
       [700, 0, msgs[4]],
     ];
 
-    function play() {
+    function play(firstDelay) {
       var chain = Promise.resolve();
-      script.forEach(function (step) {
-        chain = chain.then(function () { return sleep(step[0]); }).then(function () {
+      script.forEach(function (step, i) {
+        chain = chain.then(function () { return sleep(i === 0 ? firstDelay : step[0]); }).then(function () {
           var el = step[2];
           if (step[1] > 0) {
             el.classList.add('typing', 'show');
@@ -64,25 +94,38 @@
           el.classList.add('show');
         });
       });
-      // Son satır iş fişidir: düşer, ardından mühür basılır.
       return chain.then(function () { return sleep(550); }).then(function () {
         msgs[msgs.length - 1].classList.add('stamped');
         return sleep(400);
-      }).then(function () { document.body.setAttribute('data-chat-done', '1'); });
+      }).then(function () {
+        document.body.setAttribute('data-chat-done', '1');
+        if (replay) { replay.hidden = false; replay.disabled = false; }
+      });
     }
 
     var started = false;
     function start() {
       if (started) return;
       started = true;
-      play().catch(fallback);
+      play(900).catch(fallback);
     }
     observeOnce([log], { threshold: 0.35 }, start);
+
+    if (replay) {
+      replay.addEventListener('click', function () {
+        replay.disabled = true;
+        document.body.removeAttribute('data-chat-done');
+        msgs.forEach(function (m) { m.classList.remove('show', 'typing', 'stamped'); });
+        void log.offsetWidth; // başlangıç durumuna dönüşü tarayıcıya işlet
+        play(350).catch(fallback);
+      });
+    }
   }
 
   document.addEventListener('DOMContentLoaded', function () {
     try {
-      initSteps();
+      initReveals();
+      initScroll();
       initChat();
     } catch (e) {
       fallback();

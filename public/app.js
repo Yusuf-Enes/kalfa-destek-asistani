@@ -5,6 +5,7 @@
   var success = document.getElementById('success');
   var successId = document.getElementById('success-id');
   var counter = document.getElementById('message-count');
+  var meter = document.getElementById('message-meter');
   var newRequestBtn = document.getElementById('new-request');
   var FIELDS = ['name', 'email', 'service', 'message'];
   var SEND_LABEL = 'Talebi gönder';
@@ -65,11 +66,17 @@
     sending = on;
     submitBtn.disabled = on;
     submitBtn.textContent = on ? 'Gönderiliyor…' : SEND_LABEL;
+    submitBtn.classList.toggle('is-sending', on);
     form.setAttribute('aria-busy', on ? 'true' : 'false');
   }
 
   function updateCounter() {
-    counter.textContent = String(field('message').value.length);
+    var n = field('message').value.length;
+    counter.textContent = String(n);
+    // İlerleme çizgisi, en az uzunluk hedefine doğru dolar ve hedefe ulaşınca yeşile döner.
+    var goal = Validation.LIMITS.message.min;
+    meter.style.setProperty('--fill', Math.min(n / goal, 1).toFixed(3));
+    meter.classList.toggle('ok', n >= goal);
   }
 
   // Alan bırakıldığında ya da hatalı alan düzeltilirken o alanı yeniden denetle.

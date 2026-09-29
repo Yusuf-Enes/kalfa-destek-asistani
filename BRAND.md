@@ -81,14 +81,28 @@ Hizmetin diliyle konuşur: kalfa, usta, iş fişi, defter, tezgâh. Sade, somut 
 
 ## Hareket
 
-Sayfa açılırken tek bir sahne oynar ve bu sahne ürünün gerçek işini anlatır: başlık gelir, örnek konuşma oynar (Kalfa cevap yazarken önce "yazıyor" noktalarını gösterir), sonra **iş fişi yukarıdan düşer ve üstüne "Ustaya devredildi" mührü basılır**. Bunun dışında yalnızca bir eyleme cevap veren küçük hareketler vardır:
+Her hareket hizmetin bir yanını anlatır. Abartı yoktur, çünkü değerlendirme görsel süslemeye değil kullanılabilirliğe puan verir.
+
+**Açılış sahnesi:** Başlık tabela usulü aşağıdan yükselir, örnek konuşma oynar (Kalfa cevap yazarken önce "yazıyor" noktalarını gösterir), sonra **iş fişi yukarıdan düşer ve üstüne "Ustaya devredildi" mührü basılır**. Konuşma bitince "Yeniden oynat" düğmesi açılır. Otomatik döngü yoktur, çünkü kendiliğinden tekrarlayan içerik erişilebilirlik sorunudur.
+
+**Kaydırırken:**
 
 | Hareket | Ne anlatır |
 |---|---|
-| "Bir iş nasıl yürür" çizgisi kaydırınca çizilir | Sıralı bir süreç |
-| Hizmet satırı üzerine gelince kayar, başlığı yeşile döner | Satırın seçilebildiği |
-| Bağlantı altı çizgisi kalınlaşır | Tıklanabilirlik |
-| Düğme basınca 1 px iner | Dokunmanın algılandığı |
-| Başarı işareti çizilir | Kaydın gerçekten yapıldığı |
+| Her bölüm başlığı aşağıdan yükselir | Sayfanın tek sesi: tabela usulü |
+| "Kim neye bakar": Kalfa'ya giden işler soldan, ustaya giden işler sağdan, sırayla gelir | Devir yönü ve sırası |
+| Adım rakamları sırayla pop yapar, çizgi çizilir | Sıralı bir süreç |
+| Hizmet satırları sırayla gelir, üzerine gelince kayar | Satırın seçilebildiği |
+| Üstte ince kaydırma çizgisi, kaydırınca başlığa gölge | Sayfadaki konum |
 
-Kurallar: Yalnızca `transform` ve `opacity` animasyonlanır. `prefers-reduced-motion: reduce` seçiliyse hiçbir şey hareket etmez, fiş ve mühür baştan yerindedir. Hareket kodu hata verirse sayfa hareketsiz ve tam görünür kalır.
+**Formda:**
+
+| Hareket | Ne anlatır |
+|---|---|
+| Açıklama kutusunun altındaki çizgi dolar, 10 karaktere ulaşınca yeşile döner | En az uzunluğa ulaşıldığı |
+| Gönderirken düğmede şeritler akar | İşlemin sürdüğü |
+| Başarı kutusu makineden çıkan fiş gibi basılır, onay işareti çizilir | Kaydın gerçekten yapıldığı |
+
+**Küçük eylem geri bildirimleri:** Düğme basınca 1 px iner. Bağlantı altı çizgisi kalınlaşır. Fişin üzerine gelince fiş hafifçe kalkar. Logonun üzerine gelince önlük sallanır.
+
+**Kurallar:** Yalnızca `transform`, `opacity` ve `clip-path` animasyonlanır (istisna: gönderirken düğmedeki şerit). `prefers-reduced-motion: reduce` seçiliyse hiçbir şey hareket etmez: fiş ve mühür baştan yerindedir, tüm bölümler hemen görünür, kaydırma çizgisi ve "Yeniden oynat" düğmesi kapalıdır. Gizli başlangıç durumları yalnızca hareket açıkken geçerlidir. Hareket kodu hata verirse ya da JavaScript çalışmazsa sayfa hareketsiz ve tam görünür kalır.
