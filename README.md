@@ -10,7 +10,7 @@ Sayfa hizmeti anlatır. Gerçek bir yapay zekâ ya da otomasyon çalışmaz, ça
 ## Ne yapar
 
 - Mobil ve masaüstünde çalışan tek sayfa: sorun, nasıl çalışır, hizmetler, talep formu. Marka kimliği (logo, renk paleti, yazı tipi, hareket kuralları) [BRAND.md](BRAND.md) dosyasındadır.
-- Tek açılış sahnesi: başlık gelir, örnek konuşma oynar, ardından iş fişi düşer ve üstüne "Ustaya devredildi" mührü basılır. Kaydırırken bölüm başlıkları yükselir, "Kim neye bakar" işleri kalfadan ustaya doğru sırayla gelir, adım çizgisi çizilir. Konuşma bir düğmeyle yeniden oynatılabilir. Formda açıklama ilerleme çizgisi, gönderirken şeritli düğme ve fiş gibi basılan başarı kutusu var. "Hareketi azalt" seçiliyse hareket kapanır ve her şey hemen görünür.
+- Tek açılış sahnesi: başlık gelir, örnek konuşma oynar, ardından iş fişi düşer ve üstüne "Ustaya devredildi" mührü basılır. Kaydırırken bölüm başlıkları yükselir, "Kim neye bakar" işleri kalfadan ustaya doğru sırayla gelir, adım çizgisi çizilir. Formda açıklama ilerleme çizgisi, gönderirken şeritli düğme ve fiş gibi basılan başarı kutusu var. Sayfanın arkasında yeşil tonlarında yumuşak lekeler kaydırdıkça süzülür. "Hareketi azalt" seçiliyse hareket kapanır, zemin sabit kalır ve her şey hemen görünür.
 - Form: ad, e-posta, hizmet seçimi, açıklama.
 - Aynı doğrulama kuralları hem tarayıcıda hem sunucuda çalışır (`public/validation.js` tek dosyadır, ikisi de onu kullanır). İstemci doğrulaması yalnızca kolaylıktır, güvenlik sunucudadır.
 - Gönderiliyor, başarı, alan hatası, sunucu hatası, zaman aşımı ve ağ kesintisi durumları ayrı ayrı ele alınır.
@@ -52,13 +52,13 @@ curl -H "x-admin-token: gizli-bir-deger" http://localhost:3000/api/requests
 
 ```bash
 npm test                       # 29 sunucu testi (node:test)
-python3 tests/e2e.py           # 61 tarayıcı kontrolü, sunucu çalışırken
+python3 tests/e2e.py           # 63 tarayıcı kontrolü, sunucu çalışırken
 ```
 
 Tarayıcı testi için bir kerelik kurulum: `python3 -m pip install playwright && python3 -m playwright install chromium`. Test sonunda `shots/` klasörüne ekran görüntüleri yazar.
 
 Sunucu testleri: geçerli ve geçersiz girdiler (sınır değerler dahil), kaydın gerçekten yazılması, SQL enjeksiyon denemesi, bozuk ve aşırı büyük gövde, veri tabanı hatasında başarı dönmemesi, hız sınırı, yönetici ucunun korunması, güvenlik başlıkları.
-Tarayıcı testi: dört ekran genişliğinde yatay taşma ve konsol hatası, hatalı ve başarılı gönderim, sunucu 500 dönünce başarı mesajının çıkmaması, ağ kesintisi, çift tıklama, klavye ile kullanım, "hareketi azalt" modunda durağan sayfa, kemerin açılışı, Kalfa'nin "yazıyor" durumu, adım çizgisinin çizilmesi, iki sütunun kalfadan ustaya sırayla gelmesi, kaydırma çizgisi, konuşmanın yeniden oynatılması, açıklama ilerleme çizgisi, gönderirken şerit ve başarı kutusunun basılması.
+Tarayıcı testi: dört ekran genişliğinde yatay taşma ve konsol hatası, hatalı ve başarılı gönderim, sunucu 500 dönünce başarı mesajının çıkmaması, ağ kesintisi, çift tıklama, klavye ile kullanım, "hareketi azalt" modunda durağan sayfa, kemerin açılışı, Kalfa'nin "yazıyor" durumu, adım çizgisinin çizilmesi, iki sütunun kalfadan ustaya sırayla gelmesi, kaydırma çizgisi, zemindeki lekelerin kaydırmaya bağlı ve sıçramasız hareketi, lekelerin en koyu noktasında metin kontrastının en az 4,5 olması, açıklama ilerleme çizgisi, gönderirken şerit ve başarı kutusunun basılması.
 
 ## Güvenlik önlemleri
 

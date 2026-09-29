@@ -274,21 +274,21 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
   .js-motion .hero-copy .fine { animation-delay: 900ms; }
   @keyframes fade-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 
-  .js-motion .msg { opacity: 0; transform: translateY(8px); transition: opacity 350ms ease-out, transform 450ms var(--ease-out); }
+  .js-motion .msg { opacity: 0; transform: translateY(8px); transition: opacity 240ms ease-out, transform 320ms var(--ease-out); }
   .js-motion .msg.show { opacity: 1; transform: none; }
   .js-motion .msg.typing .txt { color: transparent; }
   .js-motion .msg.typing .txt::after {
     content: ""; position: absolute; left: 0.95rem; top: 50%; width: 0.4rem; height: 0.4rem; margin-top: -0.2rem; border-radius: 50%;
     background: var(--light); box-shadow: 0.8rem 0 var(--light), 1.6rem 0 var(--light);
-    animation: typing 900ms ease-in-out infinite;
+    animation: typing 600ms ease-in-out infinite;
   }
   @keyframes typing { 0%, 100% { opacity: 0.3; } 50% { opacity: 1; } }
 
   /* Fiş yukarıdan düşer, mühür üstüne basılır */
-  .js-motion .msg-note { opacity: 0; transform: translateY(-34px) rotate(-8deg); transition: opacity 200ms ease-out, transform 650ms cubic-bezier(0.3, 1.35, 0.5, 1); }
+  .js-motion .msg-note { opacity: 0; transform: translateY(-34px) rotate(-8deg); transition: opacity 140ms ease-out, transform 450ms cubic-bezier(0.3, 1.35, 0.5, 1); }
   .js-motion .msg-note.show { opacity: 1; transform: rotate(-1.4deg); }
   .js-motion .stamp { opacity: 0; transform: rotate(-9deg) scale(2); }
-  .js-motion .msg-note.stamped .stamp { opacity: 1; transform: rotate(-9deg) scale(1); transition: opacity 100ms ease-out, transform 240ms cubic-bezier(0.2, 1.7, 0.4, 1); }
+  .js-motion .msg-note.stamped .stamp { opacity: 1; transform: rotate(-9deg) scale(1); transition: opacity 80ms ease-out, transform 200ms cubic-bezier(0.2, 1.7, 0.4, 1); }
 
   /* Adımlar: çizgi aşağı doğru çizilir, rakamlar sırayla belirir */
   .js-motion .steps li::before { opacity: 0.2; transition: opacity 500ms; }
@@ -332,15 +332,6 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
 }
 
 /* ---------- Ek: başlık gölgesi, kaydırma çizgisi, açıklama ilerlemesi, yeniden oynat ---------- */
-.chat-caption { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
-.replay {
-  font: inherit; font-size: 0.9375rem; font-weight: 600; color: var(--tezgah); cursor: pointer;
-  background: linear-gradient(currentColor, currentColor) 0 100% / 100% 2px no-repeat; border: 0; padding: 0.35rem 0;
-  transition: background-size 180ms;
-}
-.replay:hover:not([disabled]) { background-size: 100% 4px; }
-.replay[disabled] { opacity: 0.45; cursor: default; }
-.replay[hidden] { display: none; }
 
 .site-header { transition: box-shadow 220ms; }
 .site-header.is-scrolled { box-shadow: 0 10px 22px -16px rgba(23, 55, 46, 0.6); }
@@ -398,4 +389,29 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
   /* Başarı kutusu makineden çıkan fiş gibi basılır */
   .success:not([hidden]) { animation: print 850ms var(--ease-out) both; }
   @keyframes print { from { clip-path: inset(0 0 100% 0); transform: translateY(-10px); } to { clip-path: inset(0 0 0 0); transform: none; } }
+}
+
+/* ---------- Süzülen renkli lekeler ---------- */
+/* Zemin, gövdeden bağımsız sabit bir katmandır. Yeşil tonlarında dört yumuşak leke, kaydırma oranına (--p) göre
+   çapraz yönlerde kayar ve boyut değiştirir. Ayrıca her leke kendi başına çok yavaş süzülür.
+   Hareket azaltılmışsa ya da JavaScript yoksa lekeler kapalıdır, zemin sabit sis rengidir. */
+body { background: transparent; }
+.page-bg { position: fixed; inset: 0; z-index: -1; overflow: hidden; pointer-events: none; background: var(--zemin); }
+.blob { display: none; position: absolute; will-change: transform; }
+.blob i { display: block; width: 100%; height: 100%; border-radius: 50%; background: radial-gradient(circle at center, var(--c) 0%, rgba(255, 255, 255, 0) 68%); }
+.js-motion .blob { display: block; transform: translate3d(calc(var(--p, 0) * var(--dx)), calc(var(--p, 0) * var(--dy)), 0) scale(calc(1 + var(--p, 0) * var(--ds))); }
+.b1 { width: 64vmax; height: 64vmax; left: 52vw; top: -26vmax; --c: rgba(170, 215, 191, 0.6); --dx: -78vw; --dy: 58vh; --ds: 0.22; }
+.b2 { width: 58vmax; height: 58vmax; left: -28vmax; top: 46vh; --c: rgba(186, 223, 221, 0.65); --dx: 74vw; --dy: -56vh; --ds: -0.14; }
+.b3 { width: 70vmax; height: 70vmax; left: 12vw; top: 8vh; --c: rgba(204, 231, 214, 0.7); --dx: 44vw; --dy: 48vh; --ds: 0.38; }
+.b4 { width: 42vmax; height: 42vmax; left: 70vw; top: 58vh; --c: rgba(152, 202, 174, 0.5); --dx: -62vw; --dy: -42vh; --ds: 0.2; }
+
+/* Üst çubuk zemini hafifçe geçirir */
+.site-header { background: rgba(230, 236, 232, 0.86); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .js-motion .blob i { animation: float 28s ease-in-out infinite alternate; }
+  .b2 i { animation-duration: 34s; animation-delay: -9s; }
+  .b3 i { animation-duration: 40s; animation-delay: -17s; }
+  .b4 i { animation-duration: 31s; animation-delay: -5s; }
+  @keyframes float { from { transform: translate3d(0, 0, 0) scale(1); } to { transform: translate3d(5vmax, -4vmax, 0) scale(1.09); } }
 }

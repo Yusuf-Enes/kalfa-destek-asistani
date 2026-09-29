@@ -8,8 +8,8 @@
   function fallback() {
     root.classList.remove('js-motion');
     if (document.body) document.body.setAttribute('data-chat-done', '1');
-    var replay = document.querySelector('.replay');
-    if (replay) replay.hidden = true;
+    var bg = document.querySelector('.page-bg');
+    if (bg) bg.style.removeProperty('--p');
   }
 
   function sleep(ms) {
@@ -44,48 +44,49 @@
     if (steps) observeOnce([steps], { threshold: 0.4 }, markInView);
   }
 
-  // Üstte kaydırma çizgisi ve başlığa gölge.
+  // Üstte kaydırma çizgisi, başlığa gölge ve zemindeki lekelerin kaydırmaya bağlı hareketi (--p).
   function initScroll() {
     var header = document.querySelector('.site-header');
     var bar = document.querySelector('.progress');
+    var bg = document.querySelector('.page-bg');
     var ticking = false;
     function update() {
       ticking = false;
+      var max = document.documentElement.scrollHeight - window.innerHeight;
+      var p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
       if (header) header.classList.toggle('is-scrolled', window.scrollY > 8);
-      if (bar && !reduced) {
-        var max = document.documentElement.scrollHeight - window.innerHeight;
-        var p = max > 0 ? Math.min(1, Math.max(0, window.scrollY / max)) : 0;
-        bar.style.setProperty('--p', p.toFixed(4));
-      }
+      if (reduced) return;
+      if (bar) bar.style.setProperty('--p', p.toFixed(4));
+      if (bg) bg.style.setProperty('--p', p.toFixed(4));
     }
     window.addEventListener('scroll', function () {
       if (!ticking) { ticking = true; requestAnimationFrame(update); }
     }, { passive: true });
+    window.addEventListener('resize', function () { if (!ticking) { ticking = true; requestAnimationFrame(update); } });
     update();
   }
 
   // Konuşma: müşteri satırı belirir, Kalfa önce "yazıyor" noktalarını gösterir, sonra cevabı açılır.
-  // Son satır iş fişidir: düşer, ardından mühür basılır. Bitince "Yeniden oynat" düğmesi açılır.
+  // Son satır iş fişidir: düşer, ardından mühür basılır. Konuşma hızlıdır, toplam yaklaşık 4 saniye.
   function initChat() {
     var log = document.querySelector('.chat-log');
     if (!log) return;
-    var replay = document.querySelector('.replay');
     if (reduced) { document.body.setAttribute('data-chat-done', '1'); return; }
 
     var msgs = Array.prototype.slice.call(log.children);
     // [önce bekle (ms), yazıyor süresi (ms), satır]
     var script = [
-      [0, 0, msgs[0]],
-      [900, 1200, msgs[1]],
-      [1300, 0, msgs[2]],
-      [900, 1500, msgs[3]],
-      [700, 0, msgs[4]],
+      [500, 0, msgs[0]],
+      [350, 650, msgs[1]],
+      [500, 0, msgs[2]],
+      [350, 800, msgs[3]],
+      [300, 0, msgs[4]],
     ];
 
-    function play(firstDelay) {
+    function play() {
       var chain = Promise.resolve();
-      script.forEach(function (step, i) {
-        chain = chain.then(function () { return sleep(i === 0 ? firstDelay : step[0]); }).then(function () {
+      script.forEach(function (step) {
+        chain = chain.then(function () { return sleep(step[0]); }).then(function () {
           var el = step[2];
           if (step[1] > 0) {
             el.classList.add('typing', 'show');
@@ -94,12 +95,11 @@
           el.classList.add('show');
         });
       });
-      return chain.then(function () { return sleep(550); }).then(function () {
+      return chain.then(function () { return sleep(350); }).then(function () {
         msgs[msgs.length - 1].classList.add('stamped');
-        return sleep(400);
+        return sleep(250);
       }).then(function () {
         document.body.setAttribute('data-chat-done', '1');
-        if (replay) { replay.hidden = false; replay.disabled = false; }
       });
     }
 
@@ -107,19 +107,9 @@
     function start() {
       if (started) return;
       started = true;
-      play(900).catch(fallback);
+      play().catch(fallback);
     }
     observeOnce([log], { threshold: 0.35 }, start);
-
-    if (replay) {
-      replay.addEventListener('click', function () {
-        replay.disabled = true;
-        document.body.removeAttribute('data-chat-done');
-        msgs.forEach(function (m) { m.classList.remove('show', 'typing', 'stamped'); });
-        void log.offsetWidth; // başlangıç durumuna dönüşü tarayıcıya işlet
-        play(350).catch(fallback);
-      });
-    }
   }
 
   document.addEventListener('DOMContentLoaded', function () {

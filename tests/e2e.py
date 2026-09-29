@@ -167,7 +167,8 @@ with sync_playwright() as p:
     check("hareketi azalt: başlık kelimeleri yerinde", page.evaluate("[...document.querySelectorAll('.hero h1 .w > span')].every(s => getComputedStyle(s).transform === 'none')"))
     check("hareketi azalt: mühür baştan görünür", page.evaluate("getComputedStyle(document.querySelector('.stamp')).opacity") == "1")
     check("hareketi azalt: başlıklar, metin blokları ve iki sütun baştan görünür", page.evaluate("[...document.querySelectorAll('.reveal-title > span')].every(e => getComputedStyle(e).transform === 'none') && [...document.querySelectorAll('.rv, .split-col li, .services > div')].every(e => getComputedStyle(e).opacity === '1')"))
-    check("hareketi azalt: yeniden oynat düğmesi ve kaydırma çizgisi yok", page.locator(".replay").is_hidden() and page.evaluate("getComputedStyle(document.querySelector('.progress')).display") == "none")
+    check("hareketi azalt: kaydırma çizgisi yok", page.evaluate("getComputedStyle(document.querySelector('.progress')).display") == "none")
+    check("hareketi azalt: lekeler kapalı, zemin sabit sis rengi", page.evaluate("[...document.querySelectorAll('.blob')].every(b => getComputedStyle(b).display === 'none')") and page.evaluate("getComputedStyle(document.querySelector('.page-bg')).backgroundColor") == "rgb(230, 236, 232)" and page.evaluate("getComputedStyle(document.querySelector('.page-bg')).getPropertyValue('--p') === ''"))
     check("hareketi azalt: adım çizgileri tam görünür", page.evaluate("[...document.querySelectorAll('.steps li:not(:last-child)')].every(li => getComputedStyle(li, '::after').transform === 'none')"))
     ctx.close()
 
@@ -177,8 +178,7 @@ with sync_playwright() as p:
     page.goto(BASE)
     page.wait_for_selector(".msg.typing", timeout=10000)
     check("hareket: Kalfa 'yazıyor' durumu görünür", True)
-    page.wait_for_timeout(300)
-    check("hareket: yazarken etiket görünür, metin gizli", page.evaluate("(() => { const m = document.querySelector('.msg.typing'); return getComputedStyle(m.querySelector('.who')).opacity !== '0' && getComputedStyle(m.querySelector('.txt')).color === 'rgba(0, 0, 0, 0)'; })()"))
+    check("hareket: yazarken etiket görünür, metin gizli", page.evaluate("(() => { const m = document.querySelector('.msg.typing'); if (!m) return false; return getComputedStyle(m.querySelector('.who')).opacity !== '0' && getComputedStyle(m.querySelector('.txt')).color === 'rgba(0, 0, 0, 0)'; })()"))
     check("hareket: fiş ve mühür başta görünmez", page.evaluate("getComputedStyle(document.querySelector('.stamp')).opacity") == "0")
     page.screenshot(path=f"{SHOTS}/yaziyor.png", clip={"x": 560, "y": 0, "width": 720, "height": 900})
     page.wait_for_selector(".msg-note.show", timeout=20000)
@@ -222,17 +222,67 @@ with sync_playwright() as p:
     page.fill("#message", "")
     check("ölçer: metin silinince boşalır", page.evaluate("getComputedStyle(document.getElementById('message-meter')).getPropertyValue('--fill').trim()") == "0.000")
 
-    # Konuşmayı yeniden oynat
-    page.evaluate("window.scrollTo({top: 0, behavior: 'instant'})")
-    page.wait_for_selector("body[data-chat-done='1']", timeout=25000)
-    check("yeniden oynat: konuşma bitince düğme görünür ve açık", page.locator(".replay").is_visible() and page.locator(".replay").is_enabled())
-    page.click(".replay")
-    check("yeniden oynat: tıklayınca düğme kapanır ve konuşma başa döner", page.locator(".replay").is_disabled() and page.evaluate("document.body.getAttribute('data-chat-done')") is None and page.evaluate("document.querySelector('.msg-note').classList.contains('stamped')") is False)
-    page.wait_for_selector("body[data-chat-done='1']", timeout=25000)
-    page.wait_for_timeout(700)
-    check("yeniden oynat: konuşma yeniden oynar, fiş düşer, mühür basılır", page.evaluate("document.querySelector('.msg-note').classList.contains('stamped') && getComputedStyle(document.querySelector('.stamp')).opacity === '1'"))
-    check("yeniden oynat: bitince düğme yeniden açılır", page.locator(".replay").is_enabled())
     ctx.close()
+
+    # ---- Süzülen renkli lekeler: kaydırmaya bağlı, sürekli, okunurluğu bozmayan
+    import io
+    from PIL import Image
+
+    def luminance(c):
+        c = [x / 255 for x in c]
+        c = [x / 12.92 if x <= 0.03928 else ((x + 0.055) / 1.055) ** 2.4 for x in c]
+        return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
+
+    ctx = browser.new_context(viewport={"width": 1280, "height": 900})
+    page = ctx.new_page()
+    page.goto(BASE)
+    page.wait_for_load_state("networkidle")
+    page.wait_for_timeout(300)
+    check("lekeler: dört leke görünür", page.evaluate("[...document.querySelectorAll('.blob')].length === 4 && [...document.querySelectorAll('.blob')].every(b => getComputedStyle(b).display === 'block')"))
+    rect = lambda: page.evaluate("(() => { const r = document.querySelector('.b1').getBoundingClientRect(); return [r.left, r.top]; })()")
+    pval = lambda: float(page.evaluate("getComputedStyle(document.querySelector('.page-bg')).getPropertyValue('--p')"))
+    r_top, p_top = rect(), pval()
+    page.evaluate("window.scrollTo({top: document.documentElement.scrollHeight * 0.5, behavior: 'instant'})")
+    page.wait_for_timeout(250)
+    r_mid, p_mid = rect(), pval()
+    page.evaluate("window.scrollTo({top: document.documentElement.scrollHeight, behavior: 'instant'})")
+    page.wait_for_timeout(250)
+    r_bot, p_bot = rect(), pval()
+    check(f"lekeler: kaydırma oranı 0 → ~0,5 → 1 ({p_top:.2f}, {p_mid:.2f}, {p_bot:.2f})", p_top < 0.02 and 0.35 < p_mid < 0.65 and p_bot > 0.98)
+    check("lekeler: sayfanın başı, ortası ve sonunda lekenin konumu farklı", len({tuple(round(v) for v in r) for r in (r_top, r_mid, r_bot)}) == 3)
+
+    # Süreklilik: 40 px'lik adımlarda leke bir anda sıçramaz
+    page.evaluate("window.scrollTo({top: 0, behavior: 'instant'})")
+    page.wait_for_timeout(200)
+    height = page.evaluate("document.documentElement.scrollHeight - window.innerHeight")
+    prev = rect(); jump = 0
+    for y in range(40, height, 40):
+        page.evaluate(f"window.scrollTo({{top: {y}, behavior: 'instant'}})")
+        page.wait_for_timeout(30)
+        cur = rect()
+        jump = max(jump, abs(cur[0] - prev[0]), abs(cur[1] - prev[1]))
+        prev = cur
+    check(f"lekeler: 40 px'lik kaydırma adımlarında sıçrama yok (en büyük yer değişimi {jump:.0f} px)", jump <= 24)
+    ctx.close()
+
+    # Okunurluk: içeriği gizleyip yalnızca zemini ölçer. En koyu pikselde soluk metin (#46574F) en az 4,5 olmalı.
+    muted_lum = luminance((0x46, 0x57, 0x4F))
+    worst = 99.0
+    for vw, vh in ((1280, 900), (390, 844)):
+        ctx = browser.new_context(viewport={"width": vw, "height": vh})
+        page = ctx.new_page()
+        page.goto(BASE)
+        page.wait_for_load_state("networkidle")
+        page.evaluate("document.querySelectorAll('body > *:not(.page-bg)').forEach(e => e.style.setProperty('visibility', 'hidden', 'important'))")
+        maxy = page.evaluate("document.documentElement.scrollHeight - innerHeight")
+        for k in range(0, 21):
+            page.evaluate(f"window.scrollTo({{top: {maxy * k / 20}, behavior: 'instant'}})")
+            page.wait_for_timeout(90)
+            im = Image.open(io.BytesIO(page.screenshot())).convert("RGB").resize((160, 90))
+            lmin = min(luminance(c) for c in im.getdata())
+            worst = min(worst, (max(lmin, muted_lum) + 0.05) / (min(lmin, muted_lum) + 0.05))
+        ctx.close()
+    check(f"lekeler: en koyu zemin noktasında soluk metin kontrastı {worst:.2f} (en az 4,5)", worst >= 4.5)
 
     # ---- Gönderirken düğmede şerit hareketi
     ctx = browser.new_context()

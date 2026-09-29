@@ -83,7 +83,9 @@ Hizmetin diliyle konuşur: kalfa, usta, iş fişi, defter, tezgâh. Sade, somut 
 
 Her hareket hizmetin bir yanını anlatır. Abartı yoktur, çünkü değerlendirme görsel süslemeye değil kullanılabilirliğe puan verir.
 
-**Açılış sahnesi:** Başlık tabela usulü aşağıdan yükselir, örnek konuşma oynar (Kalfa cevap yazarken önce "yazıyor" noktalarını gösterir), sonra **iş fişi yukarıdan düşer ve üstüne "Ustaya devredildi" mührü basılır**. Konuşma bitince "Yeniden oynat" düğmesi açılır. Otomatik döngü yoktur, çünkü kendiliğinden tekrarlayan içerik erişilebilirlik sorunudur.
+**Açılış sahnesi:** Başlık tabela usulü aşağıdan yükselir, örnek konuşma oynar (Kalfa cevap yazarken önce "yazıyor" noktalarını gösterir), sonra **iş fişi yukarıdan düşer ve üstüne "Ustaya devredildi" mührü basılır**. Konuşma hızlıdır, toplam yaklaşık 4 saniye sürer. Tekrar oynatma düğmesi yoktur.
+
+**Zemin:** Sayfanın arkasında sabit bir katman vardır. Yeşil tonlarında dört yumuşak leke (nane, adaçayı, açık teal, koyu nane) kaydırma oranına göre çapraz yönlerde kayar ve boyut değiştirir. Her leke ayrıca çok yavaş, kendi başına süzülür. Bu renkler bilerek marka yeşilinin etrafında tutulmuştur.
 
 **Kaydırırken:**
 
@@ -94,6 +96,7 @@ Her hareket hizmetin bir yanını anlatır. Abartı yoktur, çünkü değerlendi
 | Adım rakamları sırayla pop yapar, çizgi çizilir | Sıralı bir süreç |
 | Hizmet satırları sırayla gelir, üzerine gelince kayar | Satırın seçilebildiği |
 | Üstte ince kaydırma çizgisi, kaydırınca başlığa gölge | Sayfadaki konum |
+| Zemindeki lekeler kaydırdıkça kayar | Sayfada ilerlendiği, sayfanın canlı olduğu |
 
 **Formda:**
 
@@ -105,4 +108,4 @@ Her hareket hizmetin bir yanını anlatır. Abartı yoktur, çünkü değerlendi
 
 **Küçük eylem geri bildirimleri:** Düğme basınca 1 px iner. Bağlantı altı çizgisi kalınlaşır. Fişin üzerine gelince fiş hafifçe kalkar. Logonun üzerine gelince önlük sallanır.
 
-**Kurallar:** Yalnızca `transform`, `opacity` ve `clip-path` animasyonlanır (istisna: gönderirken düğmedeki şerit). `prefers-reduced-motion: reduce` seçiliyse hiçbir şey hareket etmez: fiş ve mühür baştan yerindedir, tüm bölümler hemen görünür, kaydırma çizgisi ve "Yeniden oynat" düğmesi kapalıdır. Gizli başlangıç durumları yalnızca hareket açıkken geçerlidir. Hareket kodu hata verirse ya da JavaScript çalışmazsa sayfa hareketsiz ve tam görünür kalır.
+**Kurallar:** Yalnızca `transform`, `opacity` ve `clip-path` animasyonlanır (istisna: gönderirken düğmedeki şerit). `prefers-reduced-motion: reduce` seçiliyse hiçbir şey hareket etmez: fiş ve mühür baştan yerindedir, tüm bölümler hemen görünür, kaydırma çizgisi ve zemindeki lekeler kapalıdır, zemin sabit sis rengidir. Lekelerin en koyu noktasında bile soluk metnin kontrastı en az 4,5 olmak zorundadır ve bu, ekran görüntüsünden ölçülerek test edilir (ölçülen en düşük değer 4,77). Gizli başlangıç durumları yalnızca hareket açıkken geçerlidir. Hareket kodu hata verirse ya da JavaScript çalışmazsa sayfa hareketsiz ve tam görünür kalır.
