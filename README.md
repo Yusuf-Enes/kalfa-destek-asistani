@@ -9,7 +9,8 @@ Sayfa hizmeti anlatır. Gerçek bir yapay zekâ ya da otomasyon çalışmaz, ça
 
 ## Ne yapar
 
-- Mobil ve masaüstünde çalışan tek sayfa: sorun, nasıl çalışır, hizmetler, talep formu.
+- Mobil ve masaüstünde çalışan tek sayfa: sorun, nasıl çalışır, hizmetler, talep formu. Marka kimliği (logo, renk paleti, yazı tipi, hareket kuralları) [BRAND.md](BRAND.md) dosyasındadır.
+- Anlamlı hareketler: canlı yazılan örnek konuşma, akan müşteri soruları şeridi, çizilen adım çizgisi, kendini çizen başarı işareti. "Hareketi azalt" seçiliyse hareket kapanır, şeritte duraklatma düğmesi vardır.
 - Form: ad, e-posta, hizmet seçimi, açıklama.
 - Aynı doğrulama kuralları hem tarayıcıda hem sunucuda çalışır (`public/validation.js` tek dosyadır, ikisi de onu kullanır). İstemci doğrulaması yalnızca kolaylıktır, güvenlik sunucudadır.
 - Gönderiliyor, başarı, alan hatası, sunucu hatası, zaman aşımı ve ağ kesintisi durumları ayrı ayrı ele alınır.
@@ -17,7 +18,7 @@ Sayfa hizmeti anlatır. Gerçek bir yapay zekâ ya da otomasyon çalışmaz, ça
 
 ## Teknoloji
 
-Node.js, Express 5, PostgreSQL, sade HTML/CSS/JS (framework yok). Hazır bir şablon kullanılmadı, tüm kod bu depoda yazıldı.
+Node.js, Express 5, PostgreSQL, sade HTML/CSS/JS (framework yok). Hazır bir şablon kullanılmadı, tüm kod bu depoda yazıldı. Tek üçüncü taraf varlık, sunucudan yayınlanan Bricolage Grotesque yazı tipidir (SIL OFL 1.1, lisansı `public/fonts/OFL.txt`).
 
 Veri tabanı iki modda çalışır ve SQL aynıdır:
 - `DATABASE_URL` tanımlıysa PostgreSQL (canlı ortam).
@@ -51,13 +52,13 @@ curl -H "x-admin-token: gizli-bir-deger" http://localhost:3000/api/requests
 
 ```bash
 npm test                       # 29 sunucu testi (node:test)
-python3 tests/e2e.py           # tarayıcı testi, sunucu çalışırken
+python3 tests/e2e.py           # 41 tarayıcı kontrolü, sunucu çalışırken
 ```
 
 Tarayıcı testi için bir kerelik kurulum: `python3 -m pip install playwright && python3 -m playwright install chromium`. Test sonunda `shots/` klasörüne ekran görüntüleri yazar.
 
 Sunucu testleri: geçerli ve geçersiz girdiler (sınır değerler dahil), kaydın gerçekten yazılması, SQL enjeksiyon denemesi, bozuk ve aşırı büyük gövde, veri tabanı hatasında başarı dönmemesi, hız sınırı, yönetici ucunun korunması, güvenlik başlıkları.
-Tarayıcı testi: dört ekran genişliğinde yatay taşma ve konsol hatası, hatalı ve başarılı gönderim, sunucu 500 dönünce başarı mesajının çıkmaması, ağ kesintisi, çift tıklama, klavye ile kullanım.
+Tarayıcı testi: dört ekran genişliğinde yatay taşma ve konsol hatası, hatalı ve başarılı gönderim, sunucu 500 dönünce başarı mesajının çıkmaması, ağ kesintisi, çift tıklama, klavye ile kullanım, "hareketi azalt" modunda durağan sayfa, akan şeridi durdurma ve devam ettirme, asistanın "yazıyor" durumu, ilerleme çubuğu, başarı işaretinin çizilmesi.
 
 ## Güvenlik önlemleri
 
@@ -87,4 +88,5 @@ Planların güncel kotalarını kendiniz de kontrol edin.
 - Aynı kişi aynı talebi tekrar gönderirse ikinci bir kayıt oluşur (tekilleştirme yok).
 - Talep sonrası e-posta gönderilmez. Kayıt yalnızca veri tabanına yazılır.
 - Ekran okuyucu ile elle test yapılmadı. Erişilebilirlik için etiketler, `aria-invalid`, hata bağlantıları, klavye akışı ve renk kontrastı hesaplandı (metinler WCAG AA üstünde).
-- Tasarım yalnızca açık temalıdır.
+- Tasarım tek temalıdır (koyu hero ve form bölümü, açık orta bölümler). Sistem koyu tema tercihine göre değişmez.
+- Safari ve Firefox'ta denenmedi, yalnızca Chromium.

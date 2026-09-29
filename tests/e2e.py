@@ -16,6 +16,19 @@ def check(label, condition):
         failures.append(label)
 
 
+def settle(page):
+    """Sayfayı baştan sona kaydırıp animasyonların bitmesini bekler, sonra en üste döner."""
+    height = page.evaluate("document.documentElement.scrollHeight")
+    for y in range(0, height, 350):
+        page.evaluate(f"window.scrollTo(0, {y})")
+        page.wait_for_timeout(120)
+    page.locator(".chat").scroll_into_view_if_needed()
+    page.wait_for_selector("body[data-chat-done='1']", timeout=15000)
+    page.wait_for_timeout(1500)
+    page.evaluate("window.scrollTo(0, 0)")
+    page.wait_for_timeout(600)
+
+
 def fill_valid(page):
     page.fill("#name", "Ayşe Demir")
     page.fill("#email", "ayse@ornek-sirket.com")
@@ -35,7 +48,7 @@ with sync_playwright() as p:
         page.on("pageerror", lambda e: errors.append(str(e)))
         page.goto(BASE)
         page.wait_for_load_state("networkidle")
-        page.wait_for_timeout(2600)  # açılış hareketi bitsin
+        settle(page)
         overflow = page.evaluate("document.documentElement.scrollWidth > document.documentElement.clientWidth")
         check(f"{label}: yatay taşma yok", not overflow)
         check(f"{label}: konsol hatası yok", not errors)
@@ -142,6 +155,51 @@ with sync_playwright() as p:
     page.keyboard.press("Enter")
     page.wait_for_timeout(300)
     check("klavye: atlama bağlantısı forma götürür", page.evaluate("location.hash") == "#talep")
+    ctx.close()
+
+    # ---- Hareket: "hareketi azalt" açıkken her şey durağan ve hemen görünür
+    ctx = browser.new_context(viewport={"width": 1280, "height": 900}, reduced_motion="reduce")
+    page = ctx.new_page()
+    page.goto(BASE)
+    page.wait_for_load_state("networkidle")
+    check("hareketi azalt: js-motion sınıfı yok", not page.evaluate("document.documentElement.classList.contains('js-motion')"))
+    check("hareketi azalt: tüm mesajlar hemen görünür", page.evaluate("[...document.querySelectorAll('.msg')].every(m => getComputedStyle(m).opacity === '1')"))
+    check("hareketi azalt: başlık kelimeleri yerinde", page.evaluate("[...document.querySelectorAll('.hero h1 .w > span')].every(s => getComputedStyle(s).transform === 'none')"))
+    check("hareketi azalt: şerit animasyonsuz ve durdurma düğmesi yok", page.evaluate("getComputedStyle(document.querySelector('.ticker-viewport')).animationName === 'none'") and page.locator("#ticker-toggle").is_hidden())
+    check("hareketi azalt: ikinci şerit kopyası gizli (ekran okuyucu tekrarı yok)", page.locator(".ticker-copy").is_hidden())
+    check("hareketi azalt: bölümler görünür", page.evaluate("[...document.querySelectorAll('[data-reveal]')].every(e => getComputedStyle(e).opacity === '1')"))
+    ctx.close()
+
+    # ---- Hareket açıkken: yazıyor durumu, şerit duraklatma, ilerleme çubuğu
+    ctx = browser.new_context(viewport={"width": 1280, "height": 900})
+    page = ctx.new_page()
+    page.goto(BASE)
+    page.wait_for_selector(".msg.typing", timeout=10000)
+    check("hareket: asistan 'yazıyor' durumu görünür", True)
+    page.screenshot(path=f"{SHOTS}/yaziyor.png", clip={"x": 640, "y": 60, "width": 640, "height": 560})
+    page.wait_for_selector("body[data-chat-done='1']", timeout=15000)
+    page.wait_for_timeout(600)
+    check("hareket: konuşma bitince tüm mesajlar görünür", page.evaluate("[...document.querySelectorAll('.msg')].every(m => getComputedStyle(m).opacity === '1' && !m.classList.contains('typing'))"))
+    check("hareket: şerit akıyor", page.evaluate("getComputedStyle(document.querySelector('.ticker-viewport')).animationName === 'ticker-run'"))
+    page.click("#ticker-toggle")
+    check("hareket: duraklat düğmesi şeridi durdurur", page.evaluate("getComputedStyle(document.querySelector('.ticker-viewport')).animationPlayState === 'paused'") and page.get_attribute("#ticker-toggle", "aria-pressed") == "true")
+    page.click("#ticker-toggle")
+    check("hareket: tekrar basınca şerit devam eder", page.evaluate("getComputedStyle(document.querySelector('.ticker-viewport')).animationPlayState === 'running'"))
+    page.evaluate("window.scrollTo({top: document.documentElement.scrollHeight, behavior: 'instant'})")
+    page.wait_for_timeout(400)
+    check("hareket: sayfa sonunda ilerleme çubuğu dolu", float(page.evaluate("getComputedStyle(document.querySelector('.progress')).getPropertyValue('--p')")) > 0.95)
+    ctx.close()
+
+    # ---- Başarı işareti gerçekten çiziliyor mu
+    ctx = browser.new_context(viewport={"width": 1280, "height": 900})
+    page = ctx.new_page()
+    page.goto(BASE)
+    fill_valid(page)
+    page.click("#submit-btn")
+    page.wait_for_selector("#success:not([hidden])")
+    page.wait_for_timeout(1400)
+    check("başarı işareti çizimi tamamlanır", page.evaluate("getComputedStyle(document.querySelector('.check-mark')).strokeDashoffset") in ("0px", "0"))
+    page.screenshot(path=f"{SHOTS}/basari-masaustu.png", clip={"x": 500, "y": 0, "width": 780, "height": 900})
     ctx.close()
 
     browser.close()

@@ -24,15 +24,16 @@ Bu dosya, çalışmanın nasıl üretildiğini ve nasıl doğrulandığını anl
 | Doğrulama | Kurallar tek dosyada (`public/validation.js`) yazıldı, tarayıcı ve sunucu aynı dosyayı kullanır. | İstemci ve sunucu birbirinden sapmaz. |
 | Kayıt listeleme | Herkese açık liste yerine `ADMIN_TOKEN` ile korunan uç. Anahtar yoksa uç hiç açılmaz. | Değerlendirici kayıtları görebilir, başkası göremez. |
 | Yapay zekâ çağrısı | Hizmet "yapay zekâ destekli" olsa da sayfada gerçek model çağrısı yok. | Görev bunu istemiyor. Maliyet, güvenlik ve hata yüzeyi eklemez. |
+| Marka ve hareket | Proje sahibi logo, renk paleti ve animasyonlu, dinamik bir tasarım istedi. Yapay zekâ, "değerlendirme görsel süsleme için puan vermiyor" gerekçesiyle hareketi anlamlı tutmayı, `prefers-reduced-motion` desteğini ve duraklatma düğmesini şart koştu. Font Google'dan değil sunucudan yayınlandı (CSP gevşemesin diye). | Logo, palet, yazı tipi ve hareket kuralları [BRAND.md](BRAND.md) içinde. |
 | Tasarım | `frontend-design` yönergesi izlendi: önce plan, sonra "şablon gibi mi" kontrolü. Krem/terracotta, büyük harfli üst etiketler, aynı kartların tekrarı ve başlıkta tek kelime vurgusu bilerek kullanılmadı. | Hero'da ürünün kendisi olan örnek konuşma var. |
 
 ## Doğrulama: neyi nasıl sınadık
 
 - **Sunucu testleri (29, `npm test`):** Geçerli ve geçersiz girdiler, sınır değerler, kaydın gerçekten yazılması, SQL enjeksiyon denemesi, bozuk ve büyük gövde, veri tabanı hatasında başarı dönmemesi, hız sınırı, yönetici ucu, güvenlik başlıkları, formdaki hizmet listesinin sunucu listesiyle aynı olması.
-- **Tarayıcı testleri (28, `tests/e2e.py`):** Dört ekran genişliğinde yatay taşma ve konsol hatası, hatalı ve başarılı gönderim, sunucu 500 dönünce ve yanıt kayıt numarası içermeyince başarı gösterilmemesi, ağ kesintisi, çift tıklamada tek istek, klavye akışı.
+- **Tarayıcı testleri (41 kontrol, `tests/e2e.py`):** Dört ekran genişliğinde yatay taşma ve konsol hatası, hatalı ve başarılı gönderim, sunucu 500 dönünce ve yanıt kayıt numarası içermeyince başarı gösterilmemesi, ağ kesintisi, çift tıklamada tek istek, klavye akışı. Yeniden tasarımdan sonra "hareketi azalt" modunda durağanlık, şeridi durdurma ve devam ettirme, asistanın "yazıyor" durumu, ilerleme çubuğu ve başarı işaretinin çizilmesi eklendi.
 - **Kalıcılık:** Kayıt oluşturuldu, sunucu kapatılıp açıldı, kayıt yerinde duruyordu.
 - **Testlerin gerçekten iş yaptığı:** Kod bilerek iki şekilde bozuldu. Mesaj alt sınırı 10'dan 1'e indirilince ilgili test kızdı. Başarı yanıtı kayıttan önce döndürülünce üç test kızdı. Kod geri alındı ve testler yeniden geçti.
-- **Renk kontrastı:** Palet için WCAG oranları hesaplandı. Metin renkleri 4,5'in üzerinde (en düşük 5,61), form çerçevesi 3'ün üzerinde (3,43).
+- **Renk kontrastı:** Hem ilk hem yeni palet için WCAG oranları hesaplandı. Yeni palette metin renkleri 4,5'in üzerinde (en düşük 5,79), form çerçevesi 3'ün üzerinde (3,77). Kobalt rengin koyu lacivert üstünde yalnızca 2,58 verdiği görüldü ve metin için kullanılmadı, koyu zeminde logo renkleri buna göre ters çevrildi.
 - **Bağımlılıklar:** `npm audit` sonucu 0 açık.
 - **Ekran görüntüleri:** Masaüstü ve mobil görüntüler gözle incelendi.
 
@@ -40,13 +41,16 @@ Bu dosya, çalışmanın nasıl üretildiğini ve nasıl doğrulandığını anl
 
 1. **Yerel veri tabanı klasörü oluşmuyordu.** Sunucu ilk çalıştırmada `.data/pglite` klasörü yok diye başlamadı. Testler bellekte çalıştığı için bunu yakalamamıştı, elle çalıştırınca ortaya çıktı. `mkdirSync` ile düzeltildi.
 2. **Masaüstünde iki bölümün üst boşluğu yoktu.** Ekran görüntüsünde "Nasıl çalışır" ve "Talep oluşturun" başlıkları üstteki çizgiye yapışıktı. Sebep: masaüstü kuralındaki `.wrap { padding: 0 2rem }`, `.section` sınıfının üst boşluğunu sıfırlıyordu. Otomatik testler bunu yakalamadı. Yalnızca yatay boşluk ayarlanarak (`padding-inline`) düzeltildi, sonra görüntü yeniden incelendi.
-3. Bir düzeltme denemesi sırasında macOS `sed` komutu hata verdi ve değişiklik uygulanmadı. Eski görüntüye bakıp düzeldi sanılmıştı. Sonuç görüntüsü yeniden üretilerek kontrol edildi ve düzeltme Edit aracıyla yapıldı.
+3. **Yeniden tasarımda "Nasıl çalışır" çizgisi başlıkların üstünden geçiyordu.** Ekran görüntüsünde başlıklar üstü çizili görünüyordu. Masaüstünde daire metnin üstüne alınarak düzeltildi.
+4. **Akan şeritte "Akışı başlat" düğmesi çalışmıyordu.** Tarayıcı testi, ikinci tıklamadan sonra şeridin hâlâ durduğunu gösterdi. Sebep: düğme odakta kaldığı için `:focus-within` kuralı şeridi durdurmayı sürdürüyordu. Kural kaldırıldı, fare duraklatması yalnızca şeridin üzerinde bırakıldı. Aynı testte iki başka kontrol de kalmıştı. Bunların testin kendi hatası olduğu ayrıca ölçülerek doğrulandı (geçiş animasyonu bitmeden ölçüm, yumuşak kaydırma bitmeden ölçüm), kod değiştirilmedi.
+5. Bir düzeltme denemesi sırasında macOS `sed` komutu hata verdi ve değişiklik uygulanmadı. Eski görüntüye bakıp düzeldi sanılmıştı. Sonuç görüntüsü yeniden üretilerek kontrol edildi ve düzeltme Edit aracıyla yapıldı.
 
 ## Sınanmayanlar
 
 - Canlı Neon Postgres bağlantısı (`pg` sürücüsü yolu) bu ortamda denenmedi.
 - Ekran okuyucu ile elle test yapılmadı.
 - Safari ve Firefox'ta denenmedi, yalnızca Chromium.
+- Animasyonların akıcılığı (kare hızı) düşük güçlü telefonlarda ölçülmedi.
 
 ## Süre
 
