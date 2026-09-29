@@ -9,7 +9,7 @@
     root.classList.remove('js-motion');
     if (document.body) document.body.setAttribute('data-chat-done', '1');
     var bg = document.querySelector('.page-bg');
-    if (bg) bg.style.removeProperty('--p');
+    if (bg) { bg.style.removeProperty('--p'); ['--c1', '--c2', '--c3', '--c4'].forEach(function (n) { bg.style.removeProperty(n); }); }
   }
 
   function sleep(ms) {
@@ -44,12 +44,47 @@
     if (steps) observeOnce([steps], { threshold: 0.4 }, markInView);
   }
 
-  // Üstte kaydırma çizgisi, başlığa gölge ve zemindeki lekelerin kaydırmaya bağlı hareketi (--p).
+  // Her konunun leke tonları: [leke1, leke2, leke3, leke4] = [r, g, b, alfa]. Sıra sayfadaki bölüm sırasıdır:
+  // hero (nane), statement (aqua), kim neye bakar (adaçayı), nasıl çalışır (teal), hizmetler (lime), form. Hepsi yeşil-mavi ailesindedir ve
+  // ilk paletteki renklerden daha koyu değildir, bu yüzden metin kontrastı bozulmaz.
+  var BLOB_PALETTES = [
+    [[143, 222, 183, 0.6], [165, 229, 213, 0.65], [190, 236, 206, 0.7], [105, 211, 167, 0.5]],
+    [[146, 217, 228, 0.6], [183, 224, 237, 0.65], [178, 236, 236, 0.7], [144, 200, 227, 0.5]],
+    [[177, 219, 130, 0.6], [202, 226, 154, 0.65], [202, 235, 185, 0.7], [148, 209, 95, 0.5]],
+    [[129, 222, 209, 0.6], [158, 229, 227, 0.65], [184, 236, 223, 0.7], [89, 211, 191, 0.5]],
+    [[192, 217, 91, 0.6], [213, 224, 121, 0.65], [211, 234, 166, 0.7], [164, 207, 48, 0.5]],
+    [[143, 222, 183, 0.6], [165, 229, 213, 0.65], [190, 236, 206, 0.7], [105, 211, 167, 0.5]]
+  ];
+  function smooth(t) { return t * t * (3 - 2 * t); }
+  function mixPalettes(a, b, t) {
+    return a.map(function (blob, i) {
+      return blob.map(function (v, k) { return v + (b[i][k] - v) * t; });
+    });
+  }
+  function paletteStr(blob) {
+    return 'rgba(' + Math.round(blob[0]) + ',' + Math.round(blob[1]) + ',' + Math.round(blob[2]) + ',' + blob[3].toFixed(3) + ')';
+  }
+
+  // Üstte kaydırma çizgisi, başlığa gölge, zemindeki lekelerin kaydırmaya bağlı hareketi (--p) ve
+  // konu değişince leke tonlarının sürekli ve yumuşak kayması. Ekranın ortasındaki konu esas alınır.
   function initScroll() {
     var header = document.querySelector('.site-header');
     var bar = document.querySelector('.progress');
     var bg = document.querySelector('.page-bg');
+    var topics = Array.prototype.slice.call(document.querySelectorAll('main > section'));
     var ticking = false;
+    function updateTones() {
+      if (!bg || !topics.length) return;
+      var mid = window.innerHeight * 0.5;
+      var centers = topics.map(function (el) { var r = el.getBoundingClientRect(); return r.top + r.height / 2; });
+      var k = 0;
+      while (k < centers.length - 1 && centers[k + 1] <= mid) k++;
+      var pal;
+      if (mid <= centers[0]) pal = BLOB_PALETTES[0];
+      else if (k >= centers.length - 1) pal = BLOB_PALETTES[Math.min(centers.length - 1, BLOB_PALETTES.length - 1)];
+      else pal = mixPalettes(BLOB_PALETTES[k], BLOB_PALETTES[k + 1], smooth((mid - centers[k]) / (centers[k + 1] - centers[k])));
+      for (var i = 0; i < 4; i++) bg.style.setProperty('--c' + (i + 1), paletteStr(pal[i]));
+    }
     function update() {
       ticking = false;
       var max = document.documentElement.scrollHeight - window.innerHeight;
@@ -58,6 +93,7 @@
       if (reduced) return;
       if (bar) bar.style.setProperty('--p', p.toFixed(4));
       if (bg) bg.style.setProperty('--p', p.toFixed(4));
+      updateTones();
     }
     window.addEventListener('scroll', function () {
       if (!ticking) { ticking = true; requestAnimationFrame(update); }

@@ -119,7 +119,7 @@ a { color: inherit; }
 .hero-copy .fine { margin: 0; }
 
 /* Örnek konuşma */
-.chat { margin: 0; padding: 1.25rem 1.25rem 1.6rem; background: var(--fis); border: 1px solid var(--line); border-radius: 4px; }
+.chat { margin: 0; padding: 1.25rem 1.25rem 1.6rem; background: var(--fis); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; }
 .chat-caption { font-size: 0.9375rem; font-weight: 500; color: var(--muted); padding-bottom: 0.9rem; margin-bottom: 1rem; border-bottom: 1px solid var(--zemin-2); }
 .chat-log { list-style: none; margin: 0; padding: 0; }
 .msg { margin-bottom: 0.95rem; }
@@ -174,7 +174,7 @@ a { color: inherit; }
 .split-usta li::before { width: 0.75rem; height: 0.75rem; border: 2px solid var(--light); transform: none; left: 0.15rem; top: 1.05rem; border-radius: 1px; }
 .split-note { max-width: 42rem; margin: 1.5rem 0 0; color: var(--muted); }
 
-.how { background: var(--fis); border-block: 1px solid var(--line); }
+.how { background: transparent; border-block: 1px solid var(--line); }
 .how h2 { color: var(--tezgah); }
 .how-grid { display: grid; gap: 3rem; }
 .how-intro p { max-width: 24rem; margin: 1.25rem 0 0; color: var(--muted); }
@@ -183,7 +183,7 @@ a { color: inherit; }
 .steps li { counter-increment: step; position: relative; padding-left: 4.5rem; }
 .steps li::before {
   content: counter(step); position: absolute; left: 0; top: -0.35rem; width: 2.9rem;
-  padding-bottom: 0.3rem; background: var(--fis);
+  padding-bottom: 0.3rem;
   text-align: center; font-size: 3.4rem; font-weight: 800; font-stretch: 76%; line-height: 1; color: var(--tezgah);
 }
 .steps li:not(:last-child)::after {
@@ -400,10 +400,10 @@ body { background: transparent; }
 .blob { display: none; position: absolute; will-change: transform; }
 .blob i { display: block; width: 100%; height: 100%; border-radius: 50%; background: radial-gradient(circle at center, var(--c) 0%, rgba(255, 255, 255, 0) 68%); }
 .js-motion .blob { display: block; transform: translate3d(calc(var(--p, 0) * var(--dx)), calc(var(--p, 0) * var(--dy)), 0) scale(calc(1 + var(--p, 0) * var(--ds))); }
-.b1 { width: 64vmax; height: 64vmax; left: 52vw; top: -26vmax; --c: rgba(170, 215, 191, 0.6); --dx: -78vw; --dy: 58vh; --ds: 0.22; }
-.b2 { width: 58vmax; height: 58vmax; left: -28vmax; top: 46vh; --c: rgba(186, 223, 221, 0.65); --dx: 74vw; --dy: -56vh; --ds: -0.14; }
-.b3 { width: 70vmax; height: 70vmax; left: 12vw; top: 8vh; --c: rgba(204, 231, 214, 0.7); --dx: 44vw; --dy: 48vh; --ds: 0.38; }
-.b4 { width: 42vmax; height: 42vmax; left: 70vw; top: 58vh; --c: rgba(152, 202, 174, 0.5); --dx: -62vw; --dy: -42vh; --ds: 0.2; }
+.b1 { width: 64vmax; height: 64vmax; left: 52vw; top: -26vmax; --c: var(--c1, rgba(170, 215, 191, 0.6)); --dx: -78vw; --dy: 58vh; --ds: 0.22; }
+.b2 { width: 58vmax; height: 58vmax; left: -28vmax; top: 46vh; --c: var(--c2, rgba(186, 223, 221, 0.65)); --dx: 74vw; --dy: -56vh; --ds: -0.14; }
+.b3 { width: 70vmax; height: 70vmax; left: 12vw; top: 8vh; --c: var(--c3, rgba(204, 231, 214, 0.7)); --dx: 44vw; --dy: 48vh; --ds: 0.38; }
+.b4 { width: 42vmax; height: 42vmax; left: 70vw; top: 58vh; --c: var(--c4, rgba(152, 202, 174, 0.5)); --dx: -62vw; --dy: -42vh; --ds: 0.2; }
 
 /* Üst çubuk zemini hafifçe geçirir */
 .site-header { background: rgba(230, 236, 232, 0.86); -webkit-backdrop-filter: blur(10px); backdrop-filter: blur(10px); }

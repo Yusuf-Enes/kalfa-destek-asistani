@@ -167,6 +167,7 @@ with sync_playwright() as p:
     check("hareketi azalt: başlık kelimeleri yerinde", page.evaluate("[...document.querySelectorAll('.hero h1 .w > span')].every(s => getComputedStyle(s).transform === 'none')"))
     check("hareketi azalt: mühür baştan görünür", page.evaluate("getComputedStyle(document.querySelector('.stamp')).opacity") == "1")
     check("hareketi azalt: başlıklar, metin blokları ve iki sütun baştan görünür", page.evaluate("[...document.querySelectorAll('.reveal-title > span')].every(e => getComputedStyle(e).transform === 'none') && [...document.querySelectorAll('.rv, .split-col li, .services > div')].every(e => getComputedStyle(e).opacity === '1')"))
+    check("hareketi azalt: leke tonu değişkenleri ayarlanmaz (zemin sabit)", page.evaluate("getComputedStyle(document.querySelector('.page-bg')).getPropertyValue('--c1').trim() === ''"))
     check("hareketi azalt: kaydırma çizgisi yok", page.evaluate("getComputedStyle(document.querySelector('.progress')).display") == "none")
     check("hareketi azalt: lekeler kapalı, zemin sabit sis rengi", page.evaluate("[...document.querySelectorAll('.blob')].every(b => getComputedStyle(b).display === 'none')") and page.evaluate("getComputedStyle(document.querySelector('.page-bg')).backgroundColor") == "rgb(230, 236, 232)" and page.evaluate("getComputedStyle(document.querySelector('.page-bg')).getPropertyValue('--p') === ''"))
     check("hareketi azalt: adım çizgileri tam görünür", page.evaluate("[...document.querySelectorAll('.steps li:not(:last-child)')].every(li => getComputedStyle(li, '::after').transform === 'none')"))
@@ -283,6 +284,71 @@ with sync_playwright() as p:
             worst = min(worst, (max(lmin, muted_lum) + 0.05) / (min(lmin, muted_lum) + 0.05))
         ctx.close()
     check(f"lekeler: en koyu zemin noktasında soluk metin kontrastı {worst:.2f} (en az 4,5)", worst >= 4.5)
+
+    # ---- Konuya göre leke tonu
+    ctx = browser.new_context(viewport={"width": 1280, "height": 900})
+    page = ctx.new_page()
+    page.goto(BASE)
+    page.wait_for_load_state("networkidle")
+    c1 = lambda: page.evaluate("getComputedStyle(document.querySelector('.page-bg')).getPropertyValue('--c1').trim()")
+    parse = lambda t: [float(x) for x in __import__('re').search(r"rgba\(([\d.]+),([\d.]+),([\d.]+)", t.replace(' ', '')).groups()]
+    tones = {}
+    for name, sel in (("hero", "#hero-title"), ("sorun", "#problem-title"), ("kim", "#split-title"), ("nasil", "#steps-title"), ("hizmet", "#services-title")):
+        page.evaluate("document.querySelector('%s').scrollIntoView({behavior: 'instant', block: 'center'})" % sel)
+        page.wait_for_timeout(200)
+        tones[name] = c1()
+    check(f"ton: beş konunun leke tonu birbirinden farklı ({len(set(tones.values()))} farklı değer)", len(set(tones.values())) == 5)
+
+    # Süreklilik: 40 px'lik adımlarda ton bir anda sıçramaz
+    page.evaluate("window.scrollTo({top: 0, behavior: 'instant'})")
+    page.wait_for_timeout(200)
+    height = page.evaluate("document.documentElement.scrollHeight - window.innerHeight")
+    prev = parse(c1()); worst = 0
+    for y in range(40, height, 40):
+        page.evaluate("window.scrollTo({top: %d, behavior: 'instant'})" % y)
+        page.wait_for_timeout(30)
+        cur = parse(c1())
+        worst = max(worst, max(abs(a - b) for a, b in zip(prev[:3], cur[:3])))
+        prev = cur
+    check(f"ton: 40 px'lik kaydırma adımlarında ton sıçraması yok (en büyük kanal farkı {worst:.1f})", worst <= 12)
+
+    # Beyaz alanlar sırıtmasın: tam genişlik bölümlerin hiçbiri düz beyaz zeminli olmamalı
+    bgs = page.evaluate("[...document.querySelectorAll('main > section')].map(s => [s.className, getComputedStyle(s).backgroundColor])")
+    white = [b for b in bgs if b[1] == 'rgb(255, 255, 255)']
+    check(f"beyaz alan: hiçbir bölümün düz beyaz zemini yok ({'sorun yok' if not white else white})", not white)
+    check("beyaz alan: 'Bir iş nasıl yürür' bölümü şeffaf, lekelerle bütünleşik", page.evaluate("getComputedStyle(document.querySelector('.how')).backgroundColor") == "rgba(0, 0, 0, 0)")
+    ctx.close()
+
+    # Kaldırılan denemeler geri gelmemiş olmalı
+    ctx = browser.new_context(viewport={"width": 1280, "height": 900})
+    page = ctx.new_page()
+    page.goto(BASE)
+    page.wait_for_load_state("networkidle")
+    check("kaldırılanlar: yeniden oynat, yan gösterge, fiş ayracı ve perde yok", page.evaluate("document.querySelectorAll('.replay, .topics, .divider, .curtain').length") == 0)
+    ctx.close()
+
+    # Konuşma hızlı: sayfa açıldıktan sonra 6,5 saniye içinde biter
+    import time
+    ctx = browser.new_context(viewport={"width": 1280, "height": 900})
+    page = ctx.new_page()
+    t0 = time.time()
+    page.goto(BASE)
+    page.wait_for_selector("body[data-chat-done='1']", timeout=15000)
+    took = time.time() - t0
+    check(f"konuşma hızı: {took:.1f} sn içinde bitti (en fazla 6,5)", took <= 6.5)
+    ctx.close()
+
+    # Açılışta yatay taşma yok: mühür başta 2 kat büyütülmüş ve görünmez bekler, taşma yaratmamalı
+    worst_overflow = 0
+    for vw, vh in ((320, 640), (360, 740), (390, 844)):
+        ctx = browser.new_context(viewport={"width": vw, "height": vh})
+        page = ctx.new_page()
+        page.goto(BASE)
+        for wait in (0, 300, 700, 1200, 1800, 2500, 3500):
+            page.wait_for_timeout(wait if wait == 0 else 300)
+            worst_overflow = max(worst_overflow, page.evaluate("document.documentElement.scrollWidth - document.documentElement.clientWidth"))
+        ctx.close()
+    check(f"açılışta yatay taşma yok: 320/360/390 px, açılışın 7 farklı anında (en büyük taşma {worst_overflow} px)", worst_overflow == 0)
 
     # ---- Gönderirken düğmede şerit hareketi
     ctx = browser.new_context()
