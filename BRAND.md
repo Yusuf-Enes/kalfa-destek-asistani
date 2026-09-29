@@ -8,9 +8,9 @@ Marka kendi işini anlatır. Sayfadaki her görsel karar (dar ve kalın tabela y
 
 ## Logo
 
-**Simge:** Kalfa önlüğü. Boyun boşluğu, iki askı ve cep.
+**Simge:** Kalfa önlüğü. Boyun askısı, gövde, iki kısa bel bağı, etek ve cep. Bel bağları siluete önlük olduğunu söyletir, cep de işin (fişin) taşındığı yerdir. Simge yalnızca düz dolgu ve tek bir çizgiden oluşur, bu yüzden 16 piksele kadar okunur.
 
-| Kullanım | Önlük | Cep çizgisi |
+| Kullanım | Önlük (gövde, bağlar, askı) | Cep çizgisi |
 |---|---|---|
 | Açık zemin | Tezgâh yeşili `#1F4B3E` | Sis `#E6ECE8` |
 | Koyu zemin (alt bilgi) | Açık `#EEF3F0` | Koyu tezgâh `#163A30` |
@@ -20,6 +20,8 @@ Cep çizgisi her zaman zeminin rengindedir, böylece cep önlükten "oyulmuş" g
 **Yazı:** "Kalfa", Archivo 800, dar genişlik (%78).
 
 **Dosyalar:** `public/logo.svg` (simge), `public/favicon.svg` (sekme simgesi). Sayfadaki logolar satır içi SVG'dir, böylece renk bağlama göre CSS ile değişir. Üzerine gelince önlük hafifçe sallanır.
+
+**Denenen ve elenenler:** Boyun çentikli dikdörtgen (küçükte plastik poşete benziyor), çan biçimli geniş etek (kettlebell ve el çantasına benziyor), uzun ince bel bağları (kollarını açmış bir figüre benziyor) ve cepten çıkan not (küçükte karışıyor). Seçilen biçim bunların hepsinden büyük ve küçük boyutta karşılaştırılarak seçildi.
 
 **Kurallar:** Simgenin çevresinde en az simge genişliğinin yarısı kadar boşluk bırakın. Eğmeyin, gölge eklemeyin, renklerini bu tablo dışında değiştirmeyin. En küçük kullanım genişliği 16 px.
 

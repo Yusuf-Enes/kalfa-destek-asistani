@@ -73,8 +73,9 @@ a { color: inherit; }
 .skip:focus { top: 0.75rem; outline-color: var(--ink); }
 
 /* ---------- Logo: kalfa önlüğü ---------- */
-.logo-mark { width: 1.7rem; height: 1.87rem; flex: none; overflow: visible; transform-origin: 50% 0; }
-.logo-mark .apron-body { fill: var(--tezgah); }
+.logo-mark { width: 1.85rem; height: 1.99rem; flex: none; overflow: visible; transform-origin: 50% 0; }
+.logo-mark .apron-body, .logo-mark .apron-tab { fill: var(--tezgah); }
+.logo-mark .apron-loop { fill: none; stroke: var(--tezgah); stroke-width: 2.8; stroke-linecap: round; }
 .logo-mark .apron-pocket { fill: none; stroke: var(--zemin); stroke-width: 2; }
 .brand { display: inline-flex; align-items: center; gap: 0.6rem; text-decoration: none; }
 .wordmark { font-weight: 800; font-stretch: 78%; font-size: 1.9rem; letter-spacing: 0; line-height: 1; }
@@ -249,7 +250,8 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
 .footer-bar { display: grid; gap: 1rem; align-items: center; }
 .footer-bar p { margin: 0; font-size: 0.9375rem; }
 .site-footer .brand { color: var(--light); }
-.site-footer .logo-mark .apron-body { fill: var(--light); }
+.site-footer .logo-mark .apron-body, .site-footer .logo-mark .apron-tab { fill: var(--light); }
+.site-footer .logo-mark .apron-loop { stroke: var(--light); }
 .site-footer .logo-mark .apron-pocket { stroke: var(--tezgah-deep); }
 
 /* ---------- Hareket ("hareketi azalt" seçilmediyse) ---------- */
