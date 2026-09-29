@@ -12,6 +12,9 @@ Sayfa hizmeti anlatır. Gerçek bir yapay zekâ ya da otomasyon çalışmaz, ça
 - Mobil ve masaüstünde çalışan tek sayfa: sorun, nasıl çalışır, hizmetler, talep formu. Marka kimliği (logo, renk paleti, yazı tipi, hareket kuralları) [BRAND.md](BRAND.md) dosyasındadır.
 - Tek açılış sahnesi: başlık gelir, örnek konuşma oynar, ardından iş fişi düşer ve üstüne "Ustaya devredildi" mührü basılır. Kaydırırken bölüm başlıkları yükselir, "Kim neye bakar" işleri kalfadan ustaya doğru sırayla gelir, adım çizgisi çizilir. Formda açıklama ilerleme çizgisi, gönderirken şeritli düğme ve fiş gibi basılan başarı kutusu var. Sayfanın arkasında yumuşak lekeler kaydırdıkça süzülür ve hangi konuda olduğuna göre yeşil ailesinin başka bir tonuna kayar (nane, sönük gri-yeşil, canlı zümrüt-yeşil, yumuşak nane-yeşil, taze yeşil). Sarı ve mavi yoktur. "Hareketi azalt" seçiliyse hareket kapanır, zemin sabit kalır ve her şey hemen görünür.
 - Form: ad, e-posta, hizmet seçimi, açıklama.
+- **Üç dil:** Türkçe (varsayılan), İngilizce, Almanca. Başlıktaki TR, EN, DE düğmeleriyle ya da `?lang=en` adres parametresiyle seçilir, seçim tarayıcıda saklanır. Tüm sayfa, form hataları, gönderme durumu ve başarı mesajı seçili dilde görünür. Varsayılan bilerek her zaman Türkçedir, tarayıcının dilinden tahmin edilmez.
+- **Koyu tema:** Başlıktaki düğmeyle açılıp kapanır. İlk açılışta işletim sisteminin tercihini izler, düğmeyle yapılan seçim saklanır ve işletim sistemi tercihinden önce gelir. Sayfa çizilmeden önce uygulanır, yani koyu temada beyaz bir parlama olmaz.
+- Örnek konuşmadaki mesajlar peşpeşe gelir, "yazıyor" beklemesi yoktur.
 - Aynı doğrulama kuralları hem tarayıcıda hem sunucuda çalışır (`public/validation.js` tek dosyadır, ikisi de onu kullanır). İstemci doğrulaması yalnızca kolaylıktır, güvenlik sunucudadır.
 - Gönderiliyor, başarı, alan hatası, sunucu hatası, zaman aşımı ve ağ kesintisi durumları ayrı ayrı ele alınır.
 - Başarı mesajı ve talep numarası yalnızca sunucu kaydı gerçekten yazdığında (`201` ve kayıt numarası) gösterilir.
@@ -51,14 +54,14 @@ curl -H "x-admin-token: gizli-bir-deger" http://localhost:3000/api/requests
 ## Test
 
 ```bash
-npm test                       # 29 sunucu testi (node:test)
-python3 tests/e2e.py           # 71 tarayıcı kontrolü, sunucu çalışırken
+npm test                       # 37 sunucu testi (node:test): API, güvenlik ve çeviri bütünlüğü
+python3 tests/e2e.py           # 106 tarayıcı kontrolü, sunucu çalışırken
 ```
 
 Tarayıcı testi için bir kerelik kurulum: `python3 -m pip install playwright && python3 -m playwright install chromium`. Test sonunda `shots/` klasörüne ekran görüntüleri yazar.
 
-Sunucu testleri: geçerli ve geçersiz girdiler (sınır değerler dahil), kaydın gerçekten yazılması, SQL enjeksiyon denemesi, bozuk ve aşırı büyük gövde, veri tabanı hatasında başarı dönmemesi, hız sınırı, yönetici ucunun korunması, güvenlik başlıkları.
-Tarayıcı testi: dört ekran genişliğinde yatay taşma ve konsol hatası, hatalı ve başarılı gönderim, sunucu 500 dönünce başarı mesajının çıkmaması, ağ kesintisi, çift tıklama, klavye ile kullanım, "hareketi azalt" modunda durağan sayfa, kemerin açılışı, Kalfa'nin "yazıyor" durumu, adım çizgisinin çizilmesi, iki sütunun kalfadan ustaya sırayla gelmesi, kaydırma çizgisi, zemindeki lekelerin kaydırmaya bağlı ve sıçramasız hareketi, konuya göre ton değişimi, beyaz bant kalmaması, açılışta telefonda yatay taşma olmaması, konuşmanın hızı, lekelerin en koyu noktasında metin kontrastının en az 4,5 olması, açıklama ilerleme çizgisi, gönderirken şerit ve başarı kutusunun basılması.
+Sunucu testleri (çeviri bütünlüğü dahil: eksik, boş ya da çevrilmemiş metin yakalanır): geçerli ve geçersiz girdiler (sınır değerler dahil), kaydın gerçekten yazılması, SQL enjeksiyon denemesi, bozuk ve aşırı büyük gövde, veri tabanı hatasında başarı dönmemesi, hız sınırı, yönetici ucunun korunması, güvenlik başlıkları.
+Tarayıcı testi: dört ekran genişliğinde yatay taşma ve konsol hatası, hatalı ve başarılı gönderim, sunucu 500 dönünce başarı mesajının çıkmaması, ağ kesintisi, çift tıklama, klavye ile kullanım, "hareketi azalt" modunda durağan sayfa, kemerin açılışı, Kalfa'nin "yazıyor" durumu, adım çizgisinin çizilmesi, iki sütunun kalfadan ustaya sırayla gelmesi, kaydırma çizgisi, zemindeki lekelerin kaydırmaya bağlı ve sıçramasız hareketi, konuya göre ton değişimi, beyaz bant kalmaması, açılışta telefonda yatay taşma olmaması, konuşmanın hızı, lekelerin en koyu noktasında metin kontrastının en az 4,5 olması, açıklama ilerleme çizgisi, gönderirken şerit ve başarı kutusunun basılması, dil değiştirme ve kalıcılığı, çevrilmiş doğrulama ve hata mesajları, koyu tema ve iki temada da tüm metinlerin kontrastı, koyu temada lekelerin en parlak noktasında metin kontrastı.
 
 ## Güvenlik önlemleri
 
@@ -88,5 +91,6 @@ Planların güncel kotalarını kendiniz de kontrol edin.
 - Aynı kişi aynı talebi tekrar gönderirse ikinci bir kayıt oluşur (tekilleştirme yok).
 - Talep sonrası e-posta gönderilmez. Kayıt yalnızca veri tabanına yazılır.
 - Ekran okuyucu ile elle test yapılmadı. Erişilebilirlik için etiketler, `aria-invalid`, hata bağlantıları, klavye akışı ve renk kontrastı hesaplandı (metinler WCAG AA üstünde).
-- Tasarım tek temalıdır. Sistem koyu tema tercihine göre değişmez.
+- Çevirilerin dil bilgisi ve üslubu bir anadili konuşan tarafından okunmadı. Türkçe metin ana kaynaktır, İngilizce ve Almanca çeviriler yapay zekâ tarafından yazıldı ve otomatik olarak yalnızca bütünlük (eksik, boş ya da çevrilmemiş metin) yönünden sınandı.
+- Sunucunun döndürdüğü hata mesajları Türkçedir. Tarayıcı bunları seçili dile kendisi çevirir.
 - Safari ve Firefox'ta denenmedi, yalnızca Chromium.

@@ -8,9 +8,13 @@
   var meter = document.getElementById('message-meter');
   var newRequestBtn = document.getElementById('new-request');
   var FIELDS = ['name', 'email', 'service', 'message'];
-  var SEND_LABEL = 'Talebi gönder';
   var TIMEOUT_MS = 15000;
   var sending = false;
+
+  // Seçili dil ve çeviri (i18n.js yüklenmediyse Türkçe varsayılan)
+  function lang() { return window.I18N ? window.I18N.lang : 'tr'; }
+  function t(key) { return window.I18N ? window.I18N.t(key) : key; }
+  var alertKey = null; // görünen genel uyarının çeviri anahtarı, dil değişince yeniden yazılır
 
   function field(name) { return document.getElementById(name); }
   function errorBox(name) { return document.getElementById(name + '-error'); }
@@ -34,12 +38,14 @@
     hideAlert();
   }
 
-  function showAlert(text) {
-    alertBox.textContent = text;
+  function showAlert(key) {
+    alertKey = key;
+    alertBox.textContent = t(key);
     alertBox.hidden = false;
   }
 
   function hideAlert() {
+    alertKey = null;
     alertBox.hidden = true;
     alertBox.textContent = '';
   }
@@ -65,7 +71,7 @@
   function setSending(on) {
     sending = on;
     submitBtn.disabled = on;
-    submitBtn.textContent = on ? 'Gönderiliyor…' : SEND_LABEL;
+    submitBtn.textContent = on ? t('js.sending') : t('f.submit');
     submitBtn.classList.toggle('is-sending', on);
     form.setAttribute('aria-busy', on ? 'true' : 'false');
   }
@@ -83,7 +89,7 @@
   FIELDS.forEach(function (n) {
     var input = field(n);
     function check() {
-      var res = Validation.validate(currentValues());
+      var res = Validation.validate(currentValues(), lang());
       if (res.errors[n]) showError(n, res.errors[n]);
       else clearError(n);
     }
@@ -102,7 +108,7 @@
     if (sending) return;
     clearAll();
 
-    var result = Validation.validate(currentValues());
+    var result = Validation.validate(currentValues(), lang());
     if (applyErrors(result.errors)) return;
 
     setSending(true);
@@ -130,17 +136,18 @@
           return;
         }
         if (r.status === 400 && r.body && r.body.errors) {
-          applyErrors(r.body.errors);
-          showAlert('Bazı alanları düzeltmeniz gerekiyor.');
+          // Sunucu alan adlarını Türkçe mesajla döner. Tarayıcı, seçili dilde kendi mesajını gösterir.
+          var texts = Validation.MESSAGES[lang()] || Validation.MESSAGES.tr;
+          var shown = {};
+          Object.keys(r.body.errors).forEach(function (n) { shown[n] = texts[n] || r.body.errors[n]; });
+          applyErrors(shown);
+          showAlert('js.fixFields');
           return;
         }
-        var message = r.body && r.body.error ? r.body.error : 'Talebiniz kaydedilemedi. Lütfen biraz sonra tekrar deneyin.';
-        showAlert(message);
+        showAlert(r.status === 429 ? 'js.rate' : 'js.saveFailed');
       })
       .catch(function (err) {
-        showAlert(err && err.name === 'AbortError'
-          ? 'Sunucu zamanında yanıt vermedi. Talebiniz kaydedilmedi, tekrar deneyin.'
-          : 'Sunucuya ulaşılamadı. Bağlantınızı kontrol edip tekrar deneyin. Talebiniz kaydedilmedi.');
+        showAlert(err && err.name === 'AbortError' ? 'js.timeout' : 'js.network');
       })
       .then(function () {
         clearTimeout(timer);
@@ -155,6 +162,16 @@
     success.hidden = true;
     form.hidden = false;
     field('name').focus();
+  });
+
+  // Dil değişince görünen hata mesajlarını ve genel uyarıyı yeni dilde yeniden yaz.
+  document.addEventListener('kalfa:lang', function () {
+    var errs = Validation.validate(currentValues(), lang()).errors;
+    FIELDS.forEach(function (n) {
+      if (field(n).hasAttribute('aria-invalid') && errs[n]) errorBox(n).textContent = errs[n];
+    });
+    if (alertKey) alertBox.textContent = t(alertKey);
+    if (sending) submitBtn.textContent = t('js.sending');
   });
 
   updateCounter();

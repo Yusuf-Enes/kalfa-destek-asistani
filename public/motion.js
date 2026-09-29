@@ -55,6 +55,15 @@
     [[111, 228, 160, 0.6], [149, 235, 192, 0.65], [174, 240, 197, 0.7], [60, 218, 133, 0.5]],
     [[143, 222, 183, 0.6], [168, 230, 204, 0.65], [189, 236, 209, 0.7], [106, 212, 164, 0.5]]
   ];
+  // Koyu tema: aynı yeşil tonlar, ama arka planla karışınca en parlak nokta bile metin kontrastını bozmayacak kadar koyu.
+  var BLOB_PALETTES_DARK = [
+    [[22, 74, 50, 0.6], [21, 71, 52, 0.65], [20, 68, 42, 0.7], [25, 85, 60, 0.5]],
+    [[39, 73, 50, 0.6], [37, 69, 50, 0.65], [36, 66, 44, 0.7], [44, 82, 59, 0.5]],
+    [[11, 75, 54, 0.6], [10, 71, 56, 0.65], [10, 68, 45, 0.7], [12, 86, 65, 0.5]],
+    [[30, 72, 62, 0.6], [28, 70, 59, 0.65], [27, 67, 54, 0.7], [34, 83, 70, 0.5]],
+    [[15, 77, 41, 0.6], [14, 72, 43, 0.65], [13, 70, 33, 0.7], [16, 86, 49, 0.5]],
+    [[22, 74, 50, 0.6], [21, 71, 52, 0.65], [20, 68, 42, 0.7], [25, 85, 60, 0.5]]
+  ];
   function smooth(t) { return t * t * (3 - 2 * t); }
   function mixPalettes(a, b, t) {
     return a.map(function (blob, i) {
@@ -75,14 +84,15 @@
     var ticking = false;
     function updateTones() {
       if (!bg || !topics.length) return;
+      var PAL = document.documentElement.getAttribute('data-theme') === 'dark' ? BLOB_PALETTES_DARK : BLOB_PALETTES;
       var mid = window.innerHeight * 0.5;
       var centers = topics.map(function (el) { var r = el.getBoundingClientRect(); return r.top + r.height / 2; });
       var k = 0;
       while (k < centers.length - 1 && centers[k + 1] <= mid) k++;
       var pal;
-      if (mid <= centers[0]) pal = BLOB_PALETTES[0];
-      else if (k >= centers.length - 1) pal = BLOB_PALETTES[Math.min(centers.length - 1, BLOB_PALETTES.length - 1)];
-      else pal = mixPalettes(BLOB_PALETTES[k], BLOB_PALETTES[k + 1], smooth((mid - centers[k]) / (centers[k + 1] - centers[k])));
+      if (mid <= centers[0]) pal = PAL[0];
+      else if (k >= centers.length - 1) pal = PAL[Math.min(centers.length - 1, PAL.length - 1)];
+      else pal = mixPalettes(PAL[k], PAL[k + 1], smooth((mid - centers[k]) / (centers[k + 1] - centers[k])));
       for (var i = 0; i < 4; i++) bg.style.setProperty('--c' + (i + 1), paletteStr(pal[i]));
     }
     function update() {
@@ -99,36 +109,32 @@
       if (!ticking) { ticking = true; requestAnimationFrame(update); }
     }, { passive: true });
     window.addEventListener('resize', function () { if (!ticking) { ticking = true; requestAnimationFrame(update); } });
+    document.addEventListener('kalfa:theme', function () { if (!ticking) { ticking = true; requestAnimationFrame(update); } });
     update();
   }
 
-  // Konuşma: müşteri satırı belirir, Kalfa önce "yazıyor" noktalarını gösterir, sonra cevabı açılır.
-  // Son satır iş fişidir: düşer, ardından mühür basılır. Konuşma hızlıdır, toplam yaklaşık 4 saniye.
+  // Konuşma: satırlar sırayla belirir.
+  // Son satır iş fişidir: düşer, ardından mühür basılır. Mesajlar peşpeşe gelir, toplam yaklaşık 3,5 saniye.
   function initChat() {
     var log = document.querySelector('.chat-log');
     if (!log) return;
     if (reduced) { document.body.setAttribute('data-chat-done', '1'); return; }
 
     var msgs = Array.prototype.slice.call(log.children);
-    // [önce bekle (ms), yazıyor süresi (ms), satır]
+    // [önce bekle (ms), satır]. Mesajlar peşpeşe gelir, arada bekleme göstergesi yoktur.
     var script = [
-      [500, 0, msgs[0]],
-      [350, 650, msgs[1]],
-      [500, 0, msgs[2]],
-      [350, 800, msgs[3]],
-      [300, 0, msgs[4]],
+      [450, msgs[0]],
+      [520, msgs[1]],
+      [520, msgs[2]],
+      [520, msgs[3]],
+      [520, msgs[4]],
     ];
 
     function play() {
       var chain = Promise.resolve();
       script.forEach(function (step) {
         chain = chain.then(function () { return sleep(step[0]); }).then(function () {
-          var el = step[2];
-          if (step[1] > 0) {
-            el.classList.add('typing', 'show');
-            return sleep(step[1]).then(function () { el.classList.remove('typing'); });
-          }
-          el.classList.add('show');
+          step[1].classList.add('show');
         });
       });
       return chain.then(function () { return sleep(350); }).then(function () {

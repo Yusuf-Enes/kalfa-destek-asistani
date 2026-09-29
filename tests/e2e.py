@@ -173,24 +173,37 @@ with sync_playwright() as p:
     check("hareketi azalt: adım çizgileri tam görünür", page.evaluate("[...document.querySelectorAll('.steps li:not(:last-child)')].every(li => getComputedStyle(li, '::after').transform === 'none')"))
     ctx.close()
 
-    # ---- Hareket açıkken: yazıyor durumu, fiş düşer, mühür basılır, adım çizgisi
+    # ---- Hareket açıkken: mesajlar peşpeşe gelir ("yazıyor" durumu yok), fiş düşer, mühür basılır
     ctx = browser.new_context(viewport={"width": 1280, "height": 900})
     page = ctx.new_page()
+    page.add_init_script("""
+      window.__log = []; window.__typing = 0;
+      document.addEventListener('DOMContentLoaded', () => {
+        const t0 = performance.now();
+        new MutationObserver(ms => ms.forEach(m => {
+          const el = m.target;
+          if (!el.classList) return;
+          if (el.classList.contains('typing')) window.__typing++;
+          if (el.classList.contains('msg') && el.classList.contains('show') && !el.__seen) { el.__seen = true; window.__log.push(Math.round(performance.now() - t0)); }
+        })).observe(document.querySelector('.chat-log'), { attributes: true, subtree: true, attributeFilter: ['class'] });
+      });
+    """)
     page.goto(BASE)
-    page.wait_for_selector(".msg.typing", timeout=10000)
-    check("hareket: Kalfa 'yazıyor' durumu görünür", True)
-    check("hareket: yazarken etiket görünür, metin gizli", page.evaluate("(() => { const m = document.querySelector('.msg.typing'); if (!m) return false; return getComputedStyle(m.querySelector('.who')).opacity !== '0' && getComputedStyle(m.querySelector('.txt')).color === 'rgba(0, 0, 0, 0)'; })()"))
+    page.wait_for_selector(".msg-note.show", timeout=15000)
     check("hareket: fiş ve mühür başta görünmez", page.evaluate("getComputedStyle(document.querySelector('.stamp')).opacity") == "0")
-    page.screenshot(path=f"{SHOTS}/yaziyor.png", clip={"x": 560, "y": 0, "width": 720, "height": 900})
-    page.wait_for_selector(".msg-note.show", timeout=20000)
-    check("hareket: iş fişi düşer", True)
     page.wait_for_selector(".msg-note.stamped", timeout=5000)
     page.wait_for_timeout(600)
     check("hareket: mühür basılınca görünür", page.evaluate("getComputedStyle(document.querySelector('.stamp')).opacity") == "1")
     page.screenshot(path=f"{SHOTS}/muhur.png", clip={"x": 560, "y": 0, "width": 720, "height": 1000})
     page.wait_for_selector("body[data-chat-done='1']", timeout=20000)
-    page.wait_for_timeout(700)
-    check("hareket: konuşma bitince tüm satırlar görünür", page.evaluate("[...document.querySelectorAll('.msg')].every(m => getComputedStyle(m).opacity === '1' && !m.classList.contains('typing'))"))
+    page.wait_for_timeout(500)
+    log = page.evaluate("window.__log")
+    gaps = [b - a for a, b in zip(log, log[1:])]
+    check(f"mesajlar: 5 satır sırayla belirdi ({len(log)} satır)", len(log) == 5)
+    check("mesajlar: hiçbir satırda 'yazıyor' durumu oluşmadı", page.evaluate("window.__typing") == 0)
+    check(f"mesajlar: peşpeşe geliyor, aralar en fazla 900 ms (aralar {gaps})", bool(gaps) and max(gaps) <= 900)
+    check("mesajlar: HTML'de 'yazıyor' bileşeni kalmadı", page.evaluate("document.querySelectorAll('.typing').length") == 0)
+    check("hareket: konuşma bitince tüm satırlar görünür", page.evaluate("[...document.querySelectorAll('.msg')].every(m => getComputedStyle(m).opacity === '1')"))
     page.locator("#steps").scroll_into_view_if_needed()
     page.wait_for_timeout(2500)
     check("hareket: adım çizgisi çizilir", page.evaluate("document.getElementById('steps').classList.contains('in-view') && getComputedStyle(document.querySelector('.steps li'), '::after').transform !== 'matrix(1, 0, 0, 0, 0, 0)'"))
@@ -349,6 +362,213 @@ with sync_playwright() as p:
             worst_overflow = max(worst_overflow, page.evaluate("document.documentElement.scrollWidth - document.documentElement.clientWidth"))
         ctx.close()
     check(f"açılışta yatay taşma yok: 320/360/390 px, açılışın 7 farklı anında (en büyük taşma {worst_overflow} px)", worst_overflow == 0)
+
+    # ================= ÇOK DİLLİLİK =================
+    ctx = browser.new_context(viewport={"width": 1280, "height": 900})
+    page = ctx.new_page()
+    page.goto(BASE)
+    page.wait_for_load_state("networkidle")
+    snapshot = lambda: page.evaluate("Object.fromEntries([...document.querySelectorAll('[data-i18n]')].map((e, i) => [i, e.textContent]))")
+    tr_before = snapshot()
+    check("dil: varsayılan Türkçe (html lang, başlık, TR düğmesi seçili)", page.evaluate("document.documentElement.lang") == "tr" and "Müşteri destek asistanı" in page.title() and page.get_attribute(".lang [data-lang='tr']", "aria-pressed") == "true")
+
+    page.click(".lang [data-lang='en']")
+    page.wait_for_timeout(200)
+    check("dil: İngilizce başlık, html lang, sayfa başlığı, düğme durumu", page.inner_text("#hero-title").replace("\n", " ") == "Kalfa handles it, the master decides." and page.evaluate("document.documentElement.lang") == "en" and page.title() == "Kalfa · Customer support assistant" and page.get_attribute(".lang [data-lang='en']", "aria-pressed") == "true" and page.get_attribute(".lang [data-lang='tr']", "aria-pressed") == "false")
+    check("dil: İngilizce menü, konuşma ve form", page.inner_text(".nav a") == "Who handles what" and "When will my order arrive" in page.inner_text(".chat-log") and page.inner_text("label[for='name']") == "Your name" and page.inner_text("#submit-btn") == "Send request")
+    check("dil: seçim tarayıcıda saklanır", page.evaluate("localStorage.getItem('kalfa-lang')") == "en")
+    page.reload(); page.wait_for_load_state("networkidle")
+    check("dil: sayfa yenilenince seçilen dil korunur", page.evaluate("document.documentElement.lang") == "en" and page.inner_text("#submit-btn") == "Send request")
+
+    page.click(".lang [data-lang='de']")
+    page.wait_for_timeout(200)
+    check("dil: Almanca başlık, seçenekler ve düğme", page.inner_text("#hero-title").replace("\n", " ") == "Kalfa kümmert sich, der Meister entscheidet." and page.inner_text("#service option:first-child") == "Leistung auswählen" and page.inner_text("#submit-btn") == "Anfrage senden" and page.evaluate("document.documentElement.lang") == "de")
+    check("dil: başlık kelimeleri animasyon için yeniden bölünür", page.evaluate("document.querySelectorAll('#hero-title .w').length") == 6)
+
+    page.click(".lang [data-lang='tr']")
+    page.wait_for_timeout(200)
+    check("dil: Türkçeye dönünce tüm metinler ilk hâlinin birebir aynısı", snapshot() == tr_before and page.evaluate("document.querySelectorAll('#hero-title .w').length") == 5)
+    page.evaluate("localStorage.clear()")
+    ctx.close()
+
+    # Adres parametresi seçimi geçersiz kılar, geçersiz değer yok sayılır
+    ctx = browser.new_context()
+    page = ctx.new_page()
+    page.goto(BASE + "/?lang=de")
+    check("dil: ?lang=de adres parametresi Almancayı açar", page.evaluate("document.documentElement.lang") == "de" and page.inner_text("#submit-btn") == "Anfrage senden")
+    ctx.close()
+    ctx = browser.new_context()
+    page = ctx.new_page()
+    page.goto(BASE + "/?lang=fr")
+    check("dil: geçersiz ?lang=fr Türkçede kalır", page.evaluate("document.documentElement.lang") == "tr")
+    ctx.close()
+
+    # Doğrulama mesajları seçili dilde
+    for lang, expected_name, expected_email in (("en", "Enter your name, between 2 and 80 characters.", "Enter a valid email address. Example: name@company.com"), ("de", "Geben Sie Ihren Namen mit 2 bis 80 Zeichen ein.", "Geben Sie eine gültige E-Mail-Adresse ein. Beispiel: name@firma.de")):
+        ctx = browser.new_context(viewport={"width": 1280, "height": 900})
+        page = ctx.new_page()
+        page.goto(BASE + "/?lang=" + lang)
+        page.click("#submit-btn")
+        check(f"{lang}: alan hataları seçili dilde", page.inner_text("#name-error") == expected_name and page.inner_text("#email-error") == expected_email)
+        page.click(".lang [data-lang='tr']")
+        page.wait_for_timeout(150)
+        check(f"{lang}: dil değişince görünen hata metni yeni dilde yeniden yazılır", "Adınızı 2 ile 80" in page.inner_text("#name-error"))
+        ctx.close()
+
+    # Sunucu 400 dönerse mesaj seçili dilde, 500 ve ağ hataları seçili dilde
+    ctx = browser.new_context()
+    page = ctx.new_page()
+    page.route("**/api/requests", lambda r: r.fulfill(status=400, content_type="application/json", body='{"errors":{"email":"Geçerli bir e-posta adresi yazın. Örnek: ad@sirket.com"}}'))
+    page.goto(BASE + "/?lang=en")
+    fill_valid(page)
+    page.click("#submit-btn")
+    page.wait_for_selector("#form-alert:not([hidden])")
+    check("en: sunucu 400 dönünce hata İngilizce gösterilir", page.inner_text("#email-error") == "Enter a valid email address. Example: name@company.com" and page.inner_text("#form-alert") == "Some fields need to be corrected.")
+    ctx.close()
+    ctx = browser.new_context()
+    page = ctx.new_page()
+    page.route("**/api/requests", lambda r: r.fulfill(status=500, content_type="application/json", body='{"error":"x"}'))
+    page.goto(BASE + "/?lang=de")
+    fill_valid(page)
+    page.click("#submit-btn")
+    page.wait_for_selector("#form-alert:not([hidden])")
+    check("de: sunucu 500 dönünce uyarı Almanca, başarı yok", "konnte nicht gespeichert" in page.inner_text("#form-alert") and page.locator("#success").is_hidden())
+    page.click(".lang [data-lang='en']")
+    page.wait_for_timeout(150)
+    check("de→en: görünen genel uyarı dil değişince yeniden yazılır", "could not be saved" in page.inner_text("#form-alert"))
+    ctx.close()
+    ctx = browser.new_context()
+    page = ctx.new_page()
+    page.route("**/api/requests", lambda r: r.fulfill(status=429, content_type="application/json", body='{"error":"x"}'))
+    page.goto(BASE + "/?lang=en")
+    fill_valid(page)
+    page.click("#submit-btn")
+    page.wait_for_selector("#form-alert:not([hidden])")
+    check("en: 429 dönünce 'çok fazla deneme' uyarısı İngilizce", "Too many attempts" in page.inner_text("#form-alert"))
+    ctx.close()
+
+    # Gönderme ve başarı akışı seçili dilde
+    ctx = browser.new_context()
+    page = ctx.new_page()
+    page.goto(BASE + "/?lang=de")
+    fill_valid(page)
+    def slow_de(route):
+        page.wait_for_timeout(700)
+        route.continue_()
+    page.route("**/api/requests", slow_de)
+    page.click("#submit-btn")
+    page.wait_for_timeout(200)
+    check("de: gönderirken düğme 'Wird gesendet…'", page.inner_text("#submit-btn") == "Wird gesendet…")
+    page.wait_for_selector("#success:not([hidden])")
+    check("de: başarı mesajı Almanca ve kayıt numarası var", page.inner_text("#success h3") == "Ihre Anfrage wurde gespeichert" and page.inner_text("#success-id").startswith("#") and "Ihre Anfragenummer" in page.inner_text("#success"))
+    ctx.close()
+
+    # Üç dilde de en dar ekranlarda yatay taşma yok
+    worst = 0
+    for lang in ("tr", "en", "de"):
+        for vw, vh in ((320, 640), (360, 740), (390, 844)):
+            ctx = browser.new_context(viewport={"width": vw, "height": vh})
+            page = ctx.new_page()
+            page.goto(BASE + "/?lang=" + lang)
+            page.wait_for_load_state("networkidle")
+            page.wait_for_timeout(300)
+            worst = max(worst, page.evaluate("document.documentElement.scrollWidth - document.documentElement.clientWidth"))
+            ctx.close()
+    check(f"dil: TR/EN/DE için 320/360/390 px'te yatay taşma yok (en büyük {worst} px)", worst == 0)
+
+    # ================= KOYU TEMA =================
+    def lum(c):
+        c = [x / 255 for x in c]
+        c = [x / 12.92 if x <= 0.03928 else ((x + 0.055) / 1.055) ** 2.4 for x in c]
+        return 0.2126 * c[0] + 0.7152 * c[1] + 0.0722 * c[2]
+
+    def ratio(a, b):
+        la, lb = lum(a), lum(b)
+        return (max(la, lb) + 0.05) / (min(la, lb) + 0.05)
+
+    eff = """(sel) => {
+      const el = document.querySelector(sel); if (!el) return null;
+      const parse = c => { const m = c.match(/rgba?\\(([^)]+)\\)/); const p = m[1].split(',').map(Number); return [p[0], p[1], p[2], p.length > 3 ? p[3] : 1]; };
+      const layers = []; let n = el;
+      while (n && n.nodeType === 1 && n !== document.documentElement) { const c = parse(getComputedStyle(n).backgroundColor); if (c[3] > 0) layers.push(c); if (c[3] >= 1) break; n = n.parentElement; }
+      let base = parse(getComputedStyle(document.querySelector('.page-bg')).backgroundColor).slice(0, 3);
+      if (layers.length && layers[layers.length - 1][3] >= 1) base = layers.pop().slice(0, 3);
+      for (const l of layers.reverse()) base = base.map((v, i) => l[3] * l[i] + (1 - l[3]) * v);
+      return { fg: parse(getComputedStyle(el).color).slice(0, 3), bg: base };
+    }"""
+    TEXT = [".hero h1", ".lead", ".hero-copy .fine", ".nav a", ".lang button:not([aria-pressed='true'])", ".lang button[aria-pressed='true']",
+            ".msg-customer .txt", ".msg-bot .txt", ".msg-customer .who", ".chat-caption", ".slip .who", ".slip-lines dt", ".slip-lines dd", ".stamp",
+            ".statement h2", ".statement-body p", ".split h2", ".split-kalfa h3", ".split-kalfa li", ".split-usta h3", ".split-usta li", ".split-note",
+            ".how h2", ".how-intro p", ".steps h3", ".steps p", ".services dt", ".services dd", ".form-intro h2", ".form-intro p", ".form-intro .fine",
+            "label[for='name']", "#name", ".hint", "#submit-btn", ".site-footer p", ".site-footer .wordmark", ".btn-small"]
+    theme_worst = {}
+    for theme in ("light", "dark"):
+        ctx = browser.new_context(viewport={"width": 1280, "height": 900}, color_scheme=theme)
+        page = ctx.new_page()
+        page.goto(BASE)
+        page.wait_for_load_state("networkidle")
+        page.click("#submit-btn")   # hata mesajlarını görünür yap
+        page.wait_for_timeout(200)
+        check(f"tema: {theme} temada html data-theme='{theme}' ve düğme durumu doğru", page.evaluate("document.documentElement.getAttribute('data-theme')") == theme and page.get_attribute(".theme-toggle", "aria-pressed") == ("true" if theme == "dark" else "false"))
+        bad = []
+        low = (99, "")
+        for sel in TEXT + [".error"]:
+            r = page.evaluate(eff, sel)
+            if not r:
+                bad.append(f"{sel}: bulunamadı"); continue
+            cr = ratio(r["fg"], r["bg"])
+            if cr < low[0]: low = (cr, sel)
+            if cr < 4.5: bad.append(f"{sel} {cr:.2f}")
+        theme_worst[theme] = low
+        check(f"tema: {theme} temada tüm metinler en az 4,5:1 (en düşük {low[0]:.2f}, {low[1]})", not bad)
+        if bad: print("      okunmayanlar:", bad)
+        field_r = page.evaluate("""(() => { const cs = getComputedStyle(document.querySelector('#name')); const p = c => c.match(/[\\d.]+/g).map(Number).slice(0, 3); return { border: p(cs.borderTopColor), bg: p(cs.backgroundColor) }; })()""")
+        check(f"tema: {theme} temada form alanı çerçevesi en az 3:1 ({ratio(field_r['border'], field_r['bg']):.2f})", ratio(field_r["border"], field_r["bg"]) >= 3)
+        ctx.close()
+
+    # Tema düğmesi: değiştirir, saklar, yenilemede korur (işletim sistemi tercihine baskın)
+    ctx = browser.new_context(color_scheme="dark")
+    page = ctx.new_page()
+    page.goto(BASE)
+    check("tema: işletim sistemi koyuysa sayfa koyu açılır", page.evaluate("document.documentElement.getAttribute('data-theme')") == "dark")
+    dark_bg = page.evaluate("getComputedStyle(document.querySelector('.page-bg')).backgroundColor")
+    page.click(".theme-toggle")
+    page.wait_for_timeout(200)
+    light_bg = page.evaluate("getComputedStyle(document.querySelector('.page-bg')).backgroundColor")
+    check("tema: düğme temayı açığa çevirir, zemin rengi değişir ve tercih kaydedilir", page.evaluate("document.documentElement.getAttribute('data-theme')") == "light" and dark_bg == "rgb(14, 26, 22)" and light_bg == "rgb(230, 236, 232)" and page.evaluate("localStorage.getItem('kalfa-theme')") == "light" and page.get_attribute(".theme-toggle", "aria-pressed") == "false")
+    check("tema: tarayıcı tema rengi (theme-color) temayla değişir", page.evaluate("document.querySelector('meta[name=theme-color]').getAttribute('content')") == "#E6ECE8")
+    page.reload(); page.wait_for_load_state("networkidle")
+    check("tema: yenilenince seçim (açık) işletim sistemi tercihine (koyu) baskın çıkar", page.evaluate("document.documentElement.getAttribute('data-theme')") == "light")
+    page.click(".theme-toggle")
+    check("tema: tekrar basınca koyu, meta rengi de koyu", page.evaluate("document.documentElement.getAttribute('data-theme')") == "dark" and page.evaluate("document.querySelector('meta[name=theme-color]').getAttribute('content')") == "#0E1A16")
+    ctx.close()
+
+    # Koyu temada dil ve tema birlikte, hareketi azalt açıkken de çalışır
+    ctx = browser.new_context(color_scheme="dark", reduced_motion="reduce")
+    page = ctx.new_page()
+    page.goto(BASE + "/?lang=en")
+    page.wait_for_load_state("networkidle")
+    check("tema: koyu + İngilizce + hareketi azalt birlikte çalışır (zemin koyu, leke yok)", page.evaluate("getComputedStyle(document.querySelector('.page-bg')).backgroundColor") == "rgb(14, 26, 22)" and page.evaluate("[...document.querySelectorAll('.blob')].every(b => getComputedStyle(b).display === 'none')") and page.inner_text("#submit-btn") == "Send request")
+    ctx.close()
+
+    # Koyu temada lekelerin en parlak noktasında soluk metin (--muted) yine okunur olmalı
+    worst_dark = 99.0
+    for vw, vh in ((1280, 900), (390, 844)):
+        ctx = browser.new_context(viewport={"width": vw, "height": vh}, color_scheme="dark")
+        page = ctx.new_page()
+        page.goto(BASE)
+        page.wait_for_load_state("networkidle")
+        muted = [int(x) for x in page.evaluate("getComputedStyle(document.querySelector('.hint')).color").replace('rgb(', '').replace(')', '').split(',')]
+        page.evaluate("document.querySelectorAll('body > *:not(.page-bg)').forEach(e => e.style.setProperty('visibility', 'hidden', 'important'))")
+        maxy = page.evaluate("document.documentElement.scrollHeight - innerHeight")
+        for k in range(0, 21):
+            page.evaluate(f"window.scrollTo({{top: {maxy * k / 20}, behavior: 'instant'}})")
+            page.wait_for_timeout(90)
+            im = Image.open(io.BytesIO(page.screenshot())).convert("RGB").resize((160, 90))
+            lmax = max(luminance(c) for c in im.getdata())
+            worst_dark = min(worst_dark, (luminance(muted) + 0.05) / (lmax + 0.05))
+        ctx.close()
+    check(f"tema: koyu temada lekelerin en parlak noktasında soluk metin kontrastı {worst_dark:.2f} (en az 4,5)", worst_dark >= 4.5)
 
     # ---- Gönderirken düğmede şerit hareketi
     ctx = browser.new_context()
