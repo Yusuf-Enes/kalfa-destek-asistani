@@ -4,6 +4,13 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+if ! python3 -c "import playwright, PIL" 2>/dev/null; then
+  echo "Eksik Python bağımlılığı. Şunları çalıştırın:"
+  echo "  python3 -m pip install -r tests/requirements.txt"
+  echo "  python3 -m playwright install chromium"
+  exit 1
+fi
+
 PORT="${E2E_PORT:-$(python3 -c 'import socket; s=socket.socket(); s.bind(("127.0.0.1",0)); print(s.getsockname()[1])')}"
 DATA_DIR="$(mktemp -d)"
 export ADMIN_TOKEN="e2e-$(python3 -c 'import secrets; print(secrets.token_hex(8))')"

@@ -61,7 +61,7 @@ npm run test:e2e               # 145 tarayıcı kontrolü (Chromium). Sunucuyu b
 npm run test:all               # ikisi arka arkaya
 ```
 
-Tarayıcı testleri için bir kerelik kurulum: `python3 -m pip install playwright && python3 -m playwright install chromium`. Test sonunda `shots/` klasörüne ekran görüntüleri yazar. GitHub Actions ile de çalışır (`.github/workflows/ci.yml`).
+Tarayıcı testleri için bir kerelik kurulum: `python3 -m pip install -r tests/requirements.txt && python3 -m playwright install chromium` (Playwright ve Pillow kurulur). Test sonunda `shots/` klasörüne ekran görüntüleri yazar. GitHub Actions ile de çalışır (`.github/workflows/ci.yml`).
 
 **Sunucu testleri:** geçerli ve geçersiz girdiler (sınır değerler dahil), kaydın gerçekten yazılması, SQL enjeksiyon denemesi, bozuk ve aşırı büyük gövde, veri tabanı hatasında başarı dönmemesi, hız sınırı, yönetici ucunun korunması, güvenlik başlıkları, tekrar gönderimin güvenli olması (gönderim anahtarı), veri tabanı düzeyindeki geçerlilik kuralları, API yanıtlarının önbelleğe alınmaması, 404 sayfası, çeviri bütünlüğü (eksik, boş ya da çevrilmemiş metin yakalanır), sunucunun kapatılıp açılınca kaydın yerinde durması, canlıda kullanılan Postgres yolunun gerçek Postgres protokolüyle sınanması, bağlantı kopunca sunucunun çökmemesi, canlıda `DATABASE_URL` yoksa açılmayı reddetmesi. Testler Node 20, 22 ve 26'da geçti.
 

@@ -1,0 +1,3 @@
+# Tarayıcı testleri (tests/e2e.py) için Python bağımlılıkları
+playwright>=1.40
+Pillow>=10.0
