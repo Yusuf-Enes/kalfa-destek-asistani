@@ -13,7 +13,11 @@ const SCHEMA = `
 async function createDb({ connectionString, dataDir } = {}) {
   if (connectionString) {
     const { Pool } = require('pg');
-    const pool = new Pool({ connectionString, max: 5, connectionTimeoutMillis: 10000 });
+    // Boştaki bağlantıları 20 saniyede kendimiz kapatırız (Neon'un boştaki bağlantıyı kesmesinden çok önce).
+    const pool = new Pool({ connectionString, max: 5, connectionTimeoutMillis: 10000, idleTimeoutMillis: 20000 });
+    // Boştaki bir bağlantı koparsa havuz 'error' olayı yayar. Dinleyici yoksa Node süreci çöker,
+    // yani tek bir kopan bağlantı yüzünden tüm site düşerdi. Bağlantı havuzdan atılır, sonraki istek yenisini açar.
+    pool.on('error', (err) => console.error('Boştaki veri tabanı bağlantısı koptu, yenisi açılacak:', err.message));
     await pool.query(SCHEMA);
     return {
       kind: 'postgres',

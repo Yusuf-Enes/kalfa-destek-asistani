@@ -1,0 +1,18 @@
+# Render Blueprint: depoyu Render'a bağlarken uygulamayı otomatik kurar.
+# DATABASE_URL değerini (Neon bağlantı adresi) Render panelinde elle girmeniz gerekir, dosyaya yazılmaz.
+services:
+  - type: web
+    name: kalfa
+    runtime: node
+    plan: free
+    buildCommand: npm ci --omit=dev
+    startCommand: npm start
+    healthCheckPath: /healthz
+    autoDeploy: true
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: DATABASE_URL
+        sync: false
+      - key: ADMIN_TOKEN
+        generateValue: true

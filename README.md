@@ -29,7 +29,7 @@ Veri tabanı iki modda çalışır ve SQL aynıdır:
 
 ## Çalıştırma
 
-Gereksinim: Node.js 20 veya üstü.
+Gereksinim: Node.js 20 veya üstü (Node 20, 22 ve 26'da 42 sunucu testinin tamamı geçti).
 
 ```bash
 npm install
@@ -54,7 +54,7 @@ curl -H "x-admin-token: gizli-bir-deger" http://localhost:3000/api/requests
 ## Test
 
 ```bash
-npm test                       # 37 sunucu testi (node:test): API, güvenlik ve çeviri bütünlüğü
+npm test                       # 42 sunucu testi (node:test): API, güvenlik, çeviri bütünlüğü, kalıcılık ve Postgres yolu
 python3 tests/e2e.py           # 126 tarayıcı kontrolü, sunucu çalışırken
 ```
 
@@ -72,21 +72,25 @@ Tarayıcı testi: dört ekran genişliğinde yatay taşma ve konsol hatası, hat
 - Kayıt listesi yönetici anahtarı olmadan kapalı. Anahtar sabit sürede karşılaştırılır.
 - Hata durumunda istemciye iç hata mesajı verilmez, form içeriği loglanmaz.
 
-## Canlıya alma (Render + Neon, ücretsiz planlar)
+## Canlıya alma (GitHub + Render + Neon, ücretsiz planlar)
 
-Planların güncel kotalarını kendiniz de kontrol edin.
+Planların güncel kotalarını ve koşullarını kendiniz de kontrol edin, bunlar sık değişir.
 
-1. Neon'da bir proje açın ve bağlantı adresini (`postgresql://...`) kopyalayın.
-2. Kodu GitHub'a gönderin.
-3. Render'da "New Web Service" ile depoyu bağlayın. Build komutu `npm install`, start komutu `npm start`.
-4. Ortam değişkeni olarak `DATABASE_URL` (Neon adresi) ve isteğe bağlı `ADMIN_TOKEN` girin.
-5. Yayına alındıktan sonra formdan bir test kaydı gönderin ve `GET /api/requests` ile görün.
+1. **Neon** ([neon.com](https://neon.com)): bir proje açın ve bağlantı adresini (`postgresql://...`) kopyalayın. Ücretsiz planda kayıtlar süresiz durur (Render'ın kendi ücretsiz Postgres'i 30 gün sonra silindiği için kullanılmaz).
+2. **GitHub**: bu depoyu bir GitHub deposuna gönderin (`git remote add origin ...`, `git push -u origin main`).
+3. **Render** ([render.com](https://render.com)): "New +" → "Blueprint" ile depoyu bağlayın. `render.yaml` uygulamayı kendisi kurar (Node web servisi, ücretsiz plan, `/healthz` sağlık kontrolü, `ADMIN_TOKEN` otomatik üretilir).
+4. Render'ın istediği `DATABASE_URL` alanına Neon adresini yapıştırın.
+5. Yayına alındıktan sonra formdan bir test kaydı gönderin, ardından Render panelinden `ADMIN_TOKEN` değerini alıp kaydı görün: `curl -H "x-admin-token: DEĞER" https://SERVİS.onrender.com/api/requests`.
 
-Ücretsiz Render planında hizmet bir süre kullanılmazsa uyur. İlk açılış birkaç saniye yavaş olabilir.
+**Canlıda `DATABASE_URL` yoksa uygulama bilerek açılmaz** (`NODE_ENV=production` iken). Aksi halde kayıtlar sessizce Render'ın geçici diskine yazılır ve servis yeniden başlayınca silinirdi.
+
+**Ücretsiz Render planının sınırı:** 15 dakika istek almazsa servis uyur ve uyanması yaklaşık bir dakika sürer ([Render belgesi](https://render.com/docs/free)). Linki birine göstermeden önce bir kez açıp uyandırın.
+
+**Sorun giderme:** Bağlantı hatası alırsanız Neon adresindeki `&channel_binding=require` parçasını silip yeniden deneyin.
 
 ## Bilinen eksikler
 
-- Canlı Postgres (Neon) bağlantısı bu ortamda denenmedi. Yerelde aynı SQL, PGlite ile test edildi. `pg` sürücüsü yolu canlıya alındıktan sonra doğrulanmalıdır.
+- **Gerçek Neon hesabına bağlanılmadı.** Canlıda kullanılan `pg` sürücüsü yolu, gömülü veri tabanı Postgres ağ protokolüyle sunularak gerçekten çalıştırıldı ve sınandı (tablo kurulumu, kayıt, bağlantı kopması ve geri gelmesi). Ancak Neon'a özgü kısımlar (SSL, `channel_binding`, boştayken uykuya geçme) canlıya alınınca ilk gerçek kayıtla doğrulanmalıdır.
 - Rate limit bellekte tutulur. Tek sunuculuk bir kurulum için yeterlidir, birden fazla sunucuda paylaşılmaz.
 - Aynı kişi aynı talebi tekrar gönderirse ikinci bir kayıt oluşur (tekilleştirme yok).
 - Talep sonrası e-posta gönderilmez. Kayıt yalnızca veri tabanına yazılır.
