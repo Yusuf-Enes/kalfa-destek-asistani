@@ -5,6 +5,9 @@ services:
     name: kalfa
     runtime: node
     plan: free
+    # Neon veri tabanıyla aynı bölge (Frankfurt): uygulama ile veri tabanı arasındaki gecikme düşük kalır.
+    # Neon projesini başka bir bölgede açtıysanız burayı ona göre değiştirin (ohio, oregon, virginia, frankfurt, singapore).
+    region: frankfurt
     buildCommand: npm ci --omit=dev
     startCommand: npm start
     healthCheckPath: /healthz
