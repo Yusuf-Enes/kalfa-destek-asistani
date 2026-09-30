@@ -130,4 +130,4 @@ Hatalar hangi tasarım sürümünde bulunduysa oraya göre yazıldı. 2. sürüm
 
 ## Süre
 
-_(Proje sahibi: toplam harcanan süreyi buraya dürüstçe yaz.)_
+Yaklaşık 4–4,5 saat.
