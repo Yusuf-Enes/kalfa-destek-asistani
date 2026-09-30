@@ -37,22 +37,6 @@ Gereksinim: Node.js 20 veya üstü (Node 20, 22 ve 26'da 49 sunucu testinin tama
 npm install
 npm start                      # http://localhost:3000
 ```
-
-Ortam değişkenleri (hepsi isteğe bağlı):
-
-| Değişken | Anlamı |
-|---|---|
-| `PORT` | Dinlenecek port. Varsayılan 3000. |
-| `DATABASE_URL` | PostgreSQL bağlantı adresi. Yoksa yerel PGlite kullanılır. |
-| `ADMIN_TOKEN` | Tanımlıysa kayıtları `GET /api/requests` ucundan görmeyi sağlar. Tanımlı değilse bu uç hiç açılmaz. |
-
-Kayıtları görmek için:
-
-```bash
-ADMIN_TOKEN=gizli-bir-deger npm start
-curl -H "x-admin-token: gizli-bir-deger" http://localhost:3000/api/requests
-```
-
 ## Test
 
 ```bash
@@ -77,29 +61,10 @@ Tarayıcı testleri için bir kerelik kurulum: `python3 -m pip install -r tests/
 | Kullanılabilirlik ve erişilebilirlik | axe-core: 13 durumda ihlal yok. Lighthouse (canlı adres, mobil ve masaüstü): Performans, Erişilebilirlik, En İyi Uygulamalar ve SEO dört kategoride de 100. Klavye, odak, atlama bağlantısı, `prefers-reduced-motion`, iki tema ve üç dil, %200 büyütme, kontrast ölçümleri |
 | Test, hata yönetimi ve teslim | 49 sunucu + 145 tarayıcı testi, CI, `render.yaml`, hata durumları (400, 429, 500, ağ, zaman aşımı), düzgün 404, bağlantı kopmasına dayanıklılık, README |
 
-## Canlıya alma (GitHub + Render + Neon, ücretsiz planlar)
-
-Planların güncel kotalarını ve koşullarını kendiniz de kontrol edin, bunlar sık değişir.
-
-1. **Neon** ([neon.com](https://neon.com)): bir proje açın ve bağlantı adresini (`postgresql://...`) kopyalayın. Ücretsiz planda kayıtlar süresiz durur (Render'ın kendi ücretsiz Postgres'i 30 gün sonra silindiği için kullanılmaz).
-2. **GitHub**: bu depoyu bir GitHub deposuna gönderin (`git remote add origin ...`, `git push -u origin main`).
-3. **Render** ([render.com](https://render.com)): "New +" → "Blueprint" ile depoyu bağlayın. `render.yaml` uygulamayı kendisi kurar (Node web servisi, ücretsiz plan, `/healthz` sağlık kontrolü, `ADMIN_TOKEN` otomatik üretilir).
-4. Render'ın istediği `DATABASE_URL` alanına Neon adresini yapıştırın.
-5. Yayına alındıktan sonra formdan bir test kaydı gönderin, ardından Render panelinden `ADMIN_TOKEN` değerini alıp kaydı görün: `curl -H "x-admin-token: DEĞER" https://SERVİS.onrender.com/api/requests`.
-
-**Canlıda `DATABASE_URL` yoksa uygulama bilerek açılmaz** (`NODE_ENV=production` iken). Aksi halde kayıtlar sessizce Render'ın geçici diskine yazılır ve servis yeniden başlayınca silinirdi.
-
-**Ücretsiz Render planının sınırı:** 15 dakika istek almazsa servis uyur ve uyanması yaklaşık bir dakika sürer ([Render belgesi](https://render.com/docs/free)). Linki birine göstermeden önce bir kez açıp uyandırın.
-
-**Sorun giderme:** Bağlantı hatası alırsanız Neon adresindeki `&channel_binding=require` parçasını silip yeniden deneyin.
-
 ## Bilinen eksikler
 
 - Canlı ortam gerçek bir Neon Postgres veri tabanına bağlıdır. Canlı adrese gerçek tarayıcıyla ve API ile kayıt gönderilip yazıldığı, tekrar gönderimin yeni kayıt açmadığı doğrulandı. Kayıtların Neon panelinde görüldüğünü (`SELECT * FROM support_requests ORDER BY id DESC;`) hesabın sahibi ayrıca teyit etmelidir, bu kontrol dışarıdan yapılamaz. Kayıt numaraları ardışık olmayabilir: tekrar gönderimde Postgres yeni numara ayırıp kullanmaz, bu yüzden numara atlar.
 - Rate limit bellekte tutulur. Tek sunuculuk bir kurulum için yeterlidir, birden fazla sunucuda paylaşılmaz.
 - Aynı kişi aynı talebi tekrar gönderirse ikinci bir kayıt oluşur (tekilleştirme yok).
 - Talep sonrası e-posta gönderilmez. Kayıt yalnızca veri tabanına yazılır.
-- Ekran okuyucu ile elle test yapılmadı. Erişilebilirlik için etiketler, `aria-invalid`, hata bağlantıları, klavye akışı ve renk kontrastı hesaplandı (metinler WCAG AA üstünde).
 - Çevirilerin dil bilgisi ve üslubu bir anadili konuşan tarafından okunmadı. Türkçe metin ana kaynaktır, İngilizce ve Almanca çeviriler yapay zekâ tarafından yazıldı ve otomatik olarak yalnızca bütünlük (eksik, boş ya da çevrilmemiş metin) yönünden sınandı.
-- Sunucunun döndürdüğü hata mesajları Türkçedir. Tarayıcı bunları seçili dile kendisi çevirir.
-- Safari ve Firefox'ta denenmedi, yalnızca Chromium.
