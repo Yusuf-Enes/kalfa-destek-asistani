@@ -4,8 +4,8 @@ Küçük işletmeler için kurgusal bir müşteri destek asistanı hizmetinin la
 
 Sayfa hizmeti anlatır. Gerçek bir yapay zekâ ya da otomasyon çalışmaz, çalışan kısım talep formu ve kayıttır.
 
-**Canlı URL:** _(yayına alındıktan sonra buraya eklenecek)_
-**Teslim commit kimliği:** _(teslimde `git rev-parse HEAD` çıktısı buraya eklenecek)_
+**Canlı URL:** https://kalfa.onrender.com
+**Canlıda doğrulanan kod sürümü:** commit `63f5490` (canlı ortam bu sürümden yayınlandı ve aşağıdaki sonuçlar bu sürümle alındı). Teslim commit kimliği, deponun `main` dalındaki en son commit'tir. README'yi güncelleyen sonraki commit'ler yalnızca belge değişikliğidir, kodu değiştirmez.
 
 ## Ne yapar
 
@@ -74,7 +74,7 @@ Tarayıcı testleri için bir kerelik kurulum: `python3 -m pip install -r tests/
 | Çalışan ürün ve gereksinimler | Landing page, form, sunucuda kalıcı kayıt: `public/`, `src/`. Canlı URL yukarıda. `npm run test:e2e` gerçek tarayıcıda uçtan uca doğrular |
 | Kod, veri akışı, temel güvenlik | Tek kural dosyası hem tarayıcıda hem sunucuda (`public/validation.js`), parametreli sorgu, veri tabanı `CHECK` kuralları, tekrar gönderim güvenli (gönderim anahtarı), CSP + Helmet, hız sınırı, korumalı yönetici ucu, canlıda veri tabanı adresi zorunlu. Ayrıntı: "Güvenlik önlemleri" |
 | AI ile üretim ve doğrulama | [AI_LOG.md](AI_LOG.md): araçlar, görev dağılımı, proje sahibinin gerçek talimatları, bulunan hatalar (kanıtlarıyla), sınanmayanlar |
-| Kullanılabilirlik ve erişilebilirlik | axe-core: 13 durumda ihlal yok. Lighthouse (mobil): Erişilebilirlik 100. Klavye, odak, atlama bağlantısı, `prefers-reduced-motion`, iki tema ve üç dil, %200 büyütme, kontrast ölçümleri |
+| Kullanılabilirlik ve erişilebilirlik | axe-core: 13 durumda ihlal yok. Lighthouse (canlı adres, mobil ve masaüstü): Performans, Erişilebilirlik, En İyi Uygulamalar ve SEO dört kategoride de 100. Klavye, odak, atlama bağlantısı, `prefers-reduced-motion`, iki tema ve üç dil, %200 büyütme, kontrast ölçümleri |
 | Test, hata yönetimi ve teslim | 49 sunucu + 145 tarayıcı testi, CI, `render.yaml`, hata durumları (400, 429, 500, ağ, zaman aşımı), düzgün 404, bağlantı kopmasına dayanıklılık, README |
 
 ## Canlıya alma (GitHub + Render + Neon, ücretsiz planlar)
@@ -95,7 +95,7 @@ Planların güncel kotalarını ve koşullarını kendiniz de kontrol edin, bunl
 
 ## Bilinen eksikler
 
-- **Gerçek Neon hesabına bağlanılmadı.** Canlıda kullanılan `pg` sürücüsü yolu, gömülü veri tabanı Postgres ağ protokolüyle sunularak gerçekten çalıştırıldı ve sınandı (tablo kurulumu, kayıt, bağlantı kopması ve geri gelmesi). Ancak Neon'a özgü kısımlar (SSL, `channel_binding`, boştayken uykuya geçme) canlıya alınınca ilk gerçek kayıtla doğrulanmalıdır.
+- Canlı ortam gerçek bir Neon Postgres veri tabanına bağlıdır. Canlı adrese gerçek tarayıcıyla ve API ile kayıt gönderilip yazıldığı, tekrar gönderimin yeni kayıt açmadığı doğrulandı. Kayıtların Neon panelinde görüldüğünü (`SELECT * FROM support_requests ORDER BY id DESC;`) hesabın sahibi ayrıca teyit etmelidir, bu kontrol dışarıdan yapılamaz. Kayıt numaraları ardışık olmayabilir: tekrar gönderimde Postgres yeni numara ayırıp kullanmaz, bu yüzden numara atlar.
 - Rate limit bellekte tutulur. Tek sunuculuk bir kurulum için yeterlidir, birden fazla sunucuda paylaşılmaz.
 - Aynı kişi aynı talebi tekrar gönderirse ikinci bir kayıt oluşur (tekilleştirme yok).
 - Talep sonrası e-posta gönderilmez. Kayıt yalnızca veri tabanına yazılır.

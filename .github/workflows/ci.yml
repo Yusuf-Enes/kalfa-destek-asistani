@@ -23,11 +23,8 @@ jobs:
       - run: npm audit --audit-level=high
 
   # Tarayıcı testleri (Chromium): görünüm, form akışı, erişilebilirlik (axe), diller, tema, tekrar gönderim.
-  # Zamanlamaya duyarlı olduğu için ilk çalıştırmalarda sonuç yalnızca bilgi verir (continue-on-error).
-  # Birkaç çalıştırma temiz geçince bu satır kaldırılmalıdır.
   browser-tests:
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
