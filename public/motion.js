@@ -35,13 +35,16 @@
   function markInView(el) { el.classList.add('in-view'); }
 
   // Bölümler görünür olunca bir kez oynar: başlıklar, metin blokları, iki sütun, hizmet satırları, adımlar.
+  // Tetikleyici bir oran değil, öğenin üst kenarının ekranın alt %10'unun üstüne çıkmasıdır. Oran kullanılsaydı,
+  // ekrandan uzun bir öğe (küçük telefon ya da büyütülmüş metin) hiçbir zaman "yeterince görünür" olmaz ve sonsuza kadar gizli kalırdı.
+  var REVEAL_AT = { threshold: 0, rootMargin: '0px 0px -10% 0px' };
   function initReveals() {
     function all(sel) { return Array.prototype.slice.call(document.querySelectorAll(sel)); }
-    observeOnce(all('.reveal-title'), { threshold: 0.4 }, markInView);
-    observeOnce(all('.rv'), { threshold: 0.2 }, markInView);
-    observeOnce(all('.split-grid, .services'), { threshold: 0.15 }, markInView);
+    observeOnce(all('.reveal-title'), REVEAL_AT, markInView);
+    observeOnce(all('.rv'), REVEAL_AT, markInView);
+    observeOnce(all('.split-grid, .services'), REVEAL_AT, markInView);
     var steps = document.getElementById('steps');
-    if (steps) observeOnce([steps], { threshold: 0.4 }, markInView);
+    if (steps) observeOnce([steps], REVEAL_AT, markInView);
   }
 
   // Her konunun leke tonları: [leke1, leke2, leke3, leke4] = [r, g, b, alfa]. Sıra sayfadaki bölüm sırasıdır:
@@ -151,7 +154,8 @@
       started = true;
       play().catch(fallback);
     }
-    observeOnce([log], { threshold: 0.35 }, start);
+    // Üst kenar ekrana girince başlar (kart ekrandan uzun olsa bile). Oran eşiği kullanılsaydı uzun kartta hiç başlamazdı.
+    observeOnce([log], REVEAL_AT, start);
   }
 
   document.addEventListener('DOMContentLoaded', function () {

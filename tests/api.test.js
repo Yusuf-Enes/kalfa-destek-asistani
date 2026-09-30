@@ -201,3 +201,93 @@ test('formdaki hizmet seçenekleri sunucunun kabul ettiği listeyle birebir ayn�
   const { SERVICES } = require('../public/validation');
   assert.deepEqual(values, Object.keys(SERVICES).sort());
 });
+
+
+// ---------- Gönderim anahtarı (tekrar gönderim güvenli) ----------
+const KEY_A = 'a1b2c3d4-e5f6-4789-a012-b3c4d5e6f7a8';
+const KEY_B = 'b1b2c3d4-e5f6-4789-a012-b3c4d5e6f7a9';
+
+test('aynı gönderim anahtarıyla tekrar gönderim yeni kayıt açmaz, ilk kaydı döndürür', async () => {
+  const before = await count();
+  const first = await post({ ...valid, clientId: KEY_A });
+  assert.equal(first.status, 201);
+  assert.equal(first.body.duplicate, false);
+  const second = await post({ ...valid, clientId: KEY_A });
+  assert.equal(second.status, 201, 'tekrar gönderim de başarı döner (kayıt gerçekten var)');
+  assert.equal(second.body.id, first.body.id, 'aynı kayıt numarası dönmeli');
+  assert.equal(second.body.duplicate, true);
+  assert.equal(await count(), before + 1, 'iki istek tek kayıt oluşturmalı');
+});
+
+test('farklı gönderim anahtarları ayrı kayıt oluşturur', async () => {
+  const before = await count();
+  const a = await post({ ...valid, clientId: KEY_B });
+  const b = await post({ ...valid, clientId: 'c1b2c3d4-e5f6-4789-a012-b3c4d5e6f7aa' });
+  assert.notEqual(a.body.id, b.body.id);
+  assert.equal(await count(), before + 2);
+});
+
+test('anahtarsız ya da geçersiz biçimli anahtarlı istekler her seferinde yeni kayıt açar (idempotency yok)', async () => {
+  const before = await count();
+  await post(valid);
+  await post(valid);
+  await post({ ...valid, clientId: 'kisa' });          // çok kısa
+  await post({ ...valid, clientId: 'kisa' });
+  await post({ ...valid, clientId: 12345678901234567 }); // metin değil
+  await post({ ...valid, clientId: "x'; DROP TABLE support_requests;--xxxxxxxx" }); // izin verilmeyen karakterler
+  assert.equal(await count(), before + 6);
+});
+
+test('geçersiz içerik gönderim anahtarı olsa bile kaydedilmez ve anahtarı tüketmez', async () => {
+  const before = await count();
+  const bad = await post({ ...valid, email: 'x', clientId: 'd1b2c3d4-e5f6-4789-a012-b3c4d5e6f7ab' });
+  assert.equal(bad.status, 400);
+  assert.equal(await count(), before);
+  const ok = await post({ ...valid, clientId: 'd1b2c3d4-e5f6-4789-a012-b3c4d5e6f7ab' });
+  assert.equal(ok.status, 201);
+  assert.equal(ok.body.duplicate, false, 'reddedilen istek anahtarı tüketmemeli');
+});
+
+// ---------- Veri tabanı kuralları (savunma derinliği) ----------
+test('veri tabanı, uygulamayı atlayan bozuk kaydı da reddeder (CHECK kuralları)', async () => {
+  const ins = (n, e, sv, m) => db.query('INSERT INTO support_requests (name, email, service, message) VALUES ($1, $2, $3, $4)', [n, e, sv, m]);
+  const ok = ['Al', 'a@b.co', 'sss-botu', '1234567890'];
+  await ins(...ok); // sınır değerli geçerli kayıt girer
+  const bads = [
+    ['tek harfli ad', ['A', ok[1], ok[2], ok[3]]],
+    ['81 karakterli ad', ['a'.repeat(81), ok[1], ok[2], ok[3]]],
+    ['e-postada @ yok', [ok[0], 'abc', ok[2], ok[3]]],
+    ['e-postada boşluk', [ok[0], 'a b@c.com', ok[2], ok[3]]],
+    ['alan adı çok kısa', [ok[0], 'a@b.c', ok[2], ok[3]]],
+    ['listede olmayan hizmet', [ok[0], ok[1], 'hack', ok[3]]],
+    ['9 karakterli mesaj', [ok[0], ok[1], ok[2], '123456789']],
+    ['1001 karakterli mesaj', [ok[0], ok[1], ok[2], 'a'.repeat(1001)]],
+  ];
+  for (const [label, args] of bads) {
+    await assert.rejects(ins(...args), (e) => /check constraint|violates/i.test(e.message), `${label} veri tabanında reddedilmeli`);
+  }
+});
+
+// ---------- Önbellek ve 404 ----------
+test('API yanıtları önbelleğe alınmaz (no-store)', async () => {
+  const p = await fetch(`${base}/api/requests`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(valid) });
+  assert.equal(p.headers.get('cache-control'), 'no-store');
+  const l = await fetch(`${base}/api/requests`, { headers: { 'x-admin-token': 'test-anahtari' } });
+  assert.equal(l.headers.get('cache-control'), 'no-store');
+  const n = await fetch(`${base}/api/yok`);
+  assert.equal(n.headers.get('cache-control'), 'no-store');
+});
+
+test('bilinmeyen sayfa düzgün 404 sayfası döner, bilinmeyen API JSON 404 döner', async () => {
+  const page = await fetch(`${base}/olmayan-sayfa`);
+  assert.equal(page.status, 404);
+  assert.match(page.headers.get('content-type'), /text\/html/);
+  const html = await page.text();
+  assert.match(html, /Bu sayfa bulunamadı/);
+  assert.doesNotMatch(html, /Cannot GET/);
+  const api = await fetch(`${base}/api/olmayan`);
+  assert.equal(api.status, 404);
+  assert.match(api.headers.get('content-type'), /application\/json/);
+  assert.equal((await fetch(`${base}/`)).status, 200);
+  assert.equal((await fetch(`${base}/healthz`)).status, 200);
+});

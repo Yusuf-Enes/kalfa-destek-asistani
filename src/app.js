@@ -5,6 +5,7 @@ const helmet = require('helmet');
 const { rateLimit } = require('express-rate-limit');
 const { validate } = require('../public/validation');
 
+const CLIENT_ID_RE = /^[A-Za-z0-9_-]{16,64}$/;
 const SAVE_FAILED = 'Talebiniz kaydedilemedi. Lütfen biraz sonra tekrar deneyin.';
 
 function digest(value) {
@@ -35,6 +36,9 @@ function createApp({ db, adminToken, submitLimit = 10 }) {
     })
   );
 
+  // API yanıtları (kayıt listesi kişisel veri içerir) tarayıcıda ya da aradaki vekillerde önbelleğe alınmaz
+  app.use('/api', (req, res, next) => { res.set('Cache-Control', 'no-store'); next(); });
+
   app.get('/healthz', (req, res) => res.json({ ok: true }));
 
   const submitLimiter = rateLimit({
@@ -52,11 +56,19 @@ function createApp({ db, adminToken, submitLimit = 10 }) {
     }
 
     // Yanıt, INSERT tamamlanmadan asla başarı döndürmez. Hata olursa Express 5 hata yakalayıcısına düşer.
+    // Gönderim anahtarı (isteğe bağlı): aynı anahtarla gelen tekrar istek yeni kayıt açmaz, ilk kaydı döndürür.
+    // Böylece zaman aşımı ya da bağlantı kopması sonrası tekrar göndermek güvenlidir, aynı talep iki kez oluşmaz.
+    const rawKey = req.body && req.body.clientId;
+    const clientId = typeof rawKey === 'string' && CLIENT_ID_RE.test(rawKey) ? rawKey : null;
     const rows = await db.query(
-      'INSERT INTO support_requests (name, email, service, message) VALUES ($1, $2, $3, $4) RETURNING id, created_at',
-      [values.name, values.email, values.service, values.message]
+      `INSERT INTO support_requests (name, email, service, message, client_id) VALUES ($1, $2, $3, $4, $5)
+       ON CONFLICT (client_id) WHERE client_id IS NOT NULL DO UPDATE SET client_id = EXCLUDED.client_id
+       RETURNING id, created_at, (xmax = 0) AS created`,
+      [values.name, values.email, values.service, values.message, clientId]
     );
-    res.status(201).json({ id: String(rows[0].id), createdAt: new Date(rows[0].created_at).toISOString() });
+    // Kayıt günlüğü kişisel veri içermez: yalnızca numara
+    console.log(`talep ${rows[0].created ? 'kaydedildi' : 'zaten kayıtlıydı (tekrar gönderim)'}: #${rows[0].id}`);
+    res.status(201).json({ id: String(rows[0].id), createdAt: new Date(rows[0].created_at).toISOString(), duplicate: !rows[0].created });
   });
 
   // Kayıtları görmek için yönetici anahtarı gerekir. ADMIN_TOKEN tanımlı değilse uç hiç açılmaz.
@@ -75,6 +87,8 @@ function createApp({ db, adminToken, submitLimit = 10 }) {
 
   app.use('/api', (req, res) => res.status(404).json({ error: 'Bulunamadı.' }));
   app.use(express.static(path.join(__dirname, '..', 'public')));
+  // Bilinmeyen adresler için düz bir "Cannot GET" yerine sayfanın diliyle uyumlu bir 404 sayfası
+  app.use((req, res) => res.status(404).sendFile(path.join(__dirname, '..', 'public', '404.html')));
 
   // eslint-disable-next-line no-unused-vars
   app.use((err, req, res, next) => {

@@ -2,6 +2,29 @@
 
 Bu dosya, çalışmanın nasıl üretildiğini ve nasıl doğrulandığını anlatır. Yalnızca gerçekten yapılanlar yazılmıştır.
 
+## Özet
+
+- **Ne yapıldı:** Kurgusal bir müşteri destek hizmeti ("Kalfa") için landing page ve sunucuda kalıcı kayıt yapan talep formu. Node.js + Express + Postgres, framework'süz HTML/CSS/JS, üç dil, açık ve koyu tema.
+- **Nasıl üretildi:** Claude Code ile, proje sahibinin adım adım yönlendirmesiyle. Her adımda ne önerildiği, neyin değiştirildiği ve nasıl sınandığı aşağıda.
+- **Nasıl doğrulandı:** 49 sunucu testi (Node 20, 22, 26), 145 tarayıcı kontrolü, axe-core erişilebilirlik denetimi (13 durum, ihlal yok), Lighthouse (mobil: 95 / 100 / 100 / 100, masaüstü: 100 / 100 / 100 / 100), kontrast ölçümleri, kasıtlı bozma denemeleri.
+- **Bulunan hatalar:** Aşağıdaki "Süreçte bulunan gerçek hatalar" bölümünde 36 madde var, hiçbiri uydurma değil. Bazılarını yapay zekâ kendi işinde buldu, bazılarını proje sahibi fark etti, bazılarını testler yakaladı, kimi yerde de yapay zekânın kendi yanlış iddiası çıktı ve dürüstçe yazıldı.
+- **Sınanmayanlar:** Gerçek Neon hesabı, Safari ve Firefox, gerçek telefonlar, ekran okuyucu, çevirilerin anadili konuşan biri tarafından okunması. Ayrıntı "Sınanmayanlar" bölümünde.
+
+## Proje sahibinin gerçek talimatları (kronolojik)
+
+| # | Talimat (kısaltılmış) | Yapay zekâ ne yaptı |
+|---|---|---|
+| 1 | "20 yıllık deneyimli bir ekip gibi çalış: güvenlik, frontend, backend, veri tabanı, yönetici... her aşamada fikir alışverişi yap." | Kararlarda rol bazlı değerlendirme yaptı ve gerekçesini yazdı. Bunlar tek modelin üstlendiği rollerdir, gerçek kişiler değil. |
+| 2 | Her alanda en iyi skilli bul ve kur. | Resmi depodan `frontend-design` ve `webapp-testing` kuruldu (önce içerik ve script okundu). Başka skill kurulmadı. |
+| 3 | Fikir seçimi: müşteri destek asistanı, ardından "otomasyon", ardından isim ve tasarım değişiklikleri. | Seçenekler ve önerilerle sunuldu, seçimi proje sahibi yaptı. Ad Kalfa oldu. |
+| 4 | "Canlıya nasıl alırız, ücretsiz yolu var mı?" | Ücretsiz barındırma diskinin geçici olduğu fark edilip SQLite yerine Postgres'e geçildi (GitHub + Render + Neon). |
+| 5 | "Premium, klasik yapay zekâ tasarımından uzak" ve sonra "yaptığımız işle alakasız olmuş." | İlk tasarımlar reddedildi. Kalfa/usta/iş fişi hikâyesi üzerinden işe uygun tasarım kuruldu. |
+| 6 | Animasyonlar, konuşmayı hızlandırma, yeniden oynat düğmesini kaldırma, kaydırırken yumuşak arka plan değişimi. | Üç arka plan yaklaşımı denendi, ikisi beğenilmedi, dördüncü seçenekte proje sahibine sorulup seçim yaptırıldı. |
+| 7 | Sarı ve aşırı mavi olmasın, yeşil tonlar. | Renkler bir sayfada gösterilip seçtirildi, ton aralığı yeşile daraltıldı. |
+| 8 | "Yazıyor" beklemesi kalksın, koyu tema, Türkçe / İngilizce / Almanca. | Üçü de yapıldı, her biri testle korundu. |
+| 9 | Dil seçimi açılır menü olsun, başlık biraz yukarı, iade mesajı şu metin olsun. | Yapıldı. Başlığın gerçekten altta durduğu önce ölçülerek doğrulandı. |
+| 10 | "Gereksinim listesinde eksik var mı, puanlamada nerede eksik olabiliriz?" | Her madde gerçekten sınandı. Bu sırada üretim için üç ciddi risk, erişilebilirlik ve büyütme sorunları bulundu (aşağıda). |
+
 ## Araçlar
 
 - **Claude Code** (Anthropic, model: Claude Sonnet 5.5). Kod, testler, README ve bu günlük onunla üretildi. Kararları veren, yönlendiren ve sonucu inceleyen kişi proje sahibidir.
@@ -41,8 +64,8 @@ Bu dosya, çalışmanın nasıl üretildiğini ve nasıl doğrulandığını anl
 
 ## Doğrulama: neyi nasıl sınadık
 
-- **Sunucu testleri (42, `npm test`):** Geçerli ve geçersiz girdiler, sınır değerler, kaydın gerçekten yazılması, SQL enjeksiyon denemesi, bozuk ve büyük gövde, veri tabanı hatasında başarı dönmemesi, hız sınırı, yönetici ucu, güvenlik başlıkları, formdaki hizmet listesinin sunucu listesiyle aynı olması.
-- **Tarayıcı testleri (126 kontrol, `tests/e2e.py`):** Dört ekran genişliğinde yatay taşma ve konsol hatası, hatalı ve başarılı gönderim, sunucu 500 dönünce ve yanıt kayıt numarası içermeyince başarı gösterilmemesi, ağ kesintisi, çift tıklamada tek istek, klavye akışı. Son tasarımda ayrıca "hareketi azalt" modunda durağanlık (fiş ve mühür baştan yerinde), Kalfa'nın "yazıyor" durumu, fişin düşmesi ve mührün basılması, adım çizgisinin çizilmesi, başarı işaretinin çizilmesi, kalfa ve usta sütunlarının zıt yönlerden başlayıp yerine oturması, kaydırma çizgisi, üst çubuk gölgesi, açıklama ilerleme çizgisi, gönderirken şerit, başarı kutusunun basılması, lekelerin kaydırmaya bağlı ve sıçramasız hareketi ve lekelerin en koyu noktasında metin kontrastı sınanıyor.
+- **Sunucu testleri (49, `npm test`):** Geçerli ve geçersiz girdiler, sınır değerler, kaydın gerçekten yazılması, SQL enjeksiyon denemesi, bozuk ve büyük gövde, veri tabanı hatasında başarı dönmemesi, hız sınırı, yönetici ucu, güvenlik başlıkları, formdaki hizmet listesinin sunucu listesiyle aynı olması.
+- **Tarayıcı testleri (145 kontrol, `npm run test:e2e`):** Dört ekran genişliğinde yatay taşma ve konsol hatası, hatalı ve başarılı gönderim, sunucu 500 dönünce ve yanıt kayıt numarası içermeyince başarı gösterilmemesi, ağ kesintisi, çift tıklamada tek istek, klavye akışı. Son tasarımda ayrıca "hareketi azalt" modunda durağanlık (fiş ve mühür baştan yerinde), Kalfa'nın "yazıyor" durumu, fişin düşmesi ve mührün basılması, adım çizgisinin çizilmesi, başarı işaretinin çizilmesi, kalfa ve usta sütunlarının zıt yönlerden başlayıp yerine oturması, kaydırma çizgisi, üst çubuk gölgesi, açıklama ilerleme çizgisi, gönderirken şerit, başarı kutusunun basılması, lekelerin kaydırmaya bağlı ve sıçramasız hareketi ve lekelerin en koyu noktasında metin kontrastı sınanıyor.
 - **Kalıcılık:** Kayıt oluşturuldu, sunucu kapatılıp açıldı, kayıt yerinde duruyordu.
 - **Testlerin gerçekten iş yaptığı:** Kod bilerek iki şekilde bozuldu. Mesaj alt sınırı 10'dan 1'e indirilince ilgili test kızdı. Başarı yanıtı kayıttan önce döndürülünce üç test kızdı. Kod geri alındı ve testler yeniden geçti.
 - **Renk kontrastı:** Her palet için WCAG oranları hesaplandı. Teslim edilen palette tüm metin çiftleri 4,5'in üzerinde (en düşük 5,32), form çerçevesi 3'ün üzerinde (3,53). Mühür kırmızısının açık zeminde 4,44 verdiği görüldü ve bu yüzden yalnızca beyaz fişin üzerinde kullanıldı. Değerlerin tam tablosu [BRAND.md](BRAND.md) içinde.
@@ -81,7 +104,14 @@ Hatalar hangi tasarım sürümünde bulunduysa oraya göre yazıldı. 2. sürüm
 26. **Kalıcılığı yeniden başlatmayla otomatik sınayan test yoktu.** Daha önce yalnızca elle denenmişti. Sunucuyu ayrı bir süreç olarak başlatıp kayıt yazan, kapatıp yeniden başlatan ve kaydın yerinde olduğunu doğrulayan test eklendi.
 27. **Yeni testlerimden biri kararsızdı (flaky).** Dosya seviyesinde, 6 koşunun 4'ünde hata veriyordu ama tek tek testler geçiyordu. Sebep, geliştirme aracının kapanışta kuyruktaki son mesajı kapanmış veri tabanında işlemesiydi (uygulamada değil). Kapanış sıraya konup 12 koşunun 12'sinde temiz sonuç alınana kadar düzeltildi. Kararsız bir testi "geçti" diye bırakmadım.
 28. **README'de yanlış bilgi vardı.** Ücretsiz Render servisinin uyanmasının "birkaç saniye" sürdüğü yazıyordu, resmi belge yaklaşık bir dakika diyor. Düzeltildi.
-29. Bir düzeltme denemesi sırasında macOS `sed` komutu hata verdi ve değişiklik uygulanmadı. Eski görüntüye bakıp düzeldi sanılmıştı. Görüntü yeniden üretilerek kontrol edildi ve düzeltme Edit aracıyla yapıldı.
+29. **Kontrast denetim araçlarında hata çıkıyordu, gerçekte hata yoktu ama araçlar hata sanıyordu.** Kendi ölçümlerim (ekran görüntüsünden piksel ölçümü) kontrastın yeterli olduğunu söylüyordu. Ama axe-core açık temada hero ve bölüm metinleri için "kontrast 1,03 ile 1,62" ihlali verdi. Sebep: `html` öğesine koyu yeşil zemin vermiştim (sayfa altında kaydırma taşarken alt bilgiyle uyumlu olsun diye), axe yazının altındaki rengi oradan okuyordu ve üstteki sabit `page-bg` katmanını göremiyordu. **Lighthouse da axe kullanır**, yani bir değerlendirici tarayıcıda Lighthouse çalıştırsa bu hatayı görürdü. `html` zemini gerçek zemin rengine eşitlenerek düzeltildi, 13 durumda sıfır ihlal.
+30. **Erişilebilir isim, görünen metni içermiyordu (WCAG 2.5.3).** Lighthouse yakaladı: dil düğmesinde ekranda "TR" yazıyor ama ekran okuyucuya "Dil: Türkçe" söyleniyordu. Sesle kontrol kullanan biri "TR'ye tıkla" dese düğme bulunamazdı. İsim "TR, Dil: Türkçe" biçimine çevrildi. Bu denetimin puan ağırlığı sıfırdı ama gerçek bir kuraldı.
+31. **Zaman aşımında arayüz yalan söyleyebiliyordu.** Cevap kaybolursa "talebiniz kaydedilmedi" diyordu, oysa sunucu kaydı yazmış olabilir. Kullanıcı tekrar gönderirse aynı talep iki kez kaydolurdu. Çözüm: her form doldurma bir gönderim anahtarı taşıyor, sunucu aynı anahtarla gelen ikinci isteği yeni kayıt açmadan ilk kayda bağlıyor, arayüzün mesajı "kaydedilmiş olabilir, tekrar göndermek güvenli" oldu. Alan değişince anahtar yenileniyor ki düzeltilmiş içerik sessizce kaybolmasın. Uçtan uca test: cevap kasıtlı kaybettirilip tekrar gönderiliyor, sunucuda tek kayıt kaldığı doğrulanıyor.
+32. **%200 metin büyütmede sayfa yana taşıyordu (WCAG 1.4.4).** Ölçünce başlıktaki dil ve tema düğmeleri, ızgara sütunları (en uzun kelimeden küçülemiyordu), hero başlığının uzun Almanca kelimeleri ("entscheidet.") ve ekran dışında bekleyen atlama bağlantısı yüzünden 320 piksel ekranda 194 piksele kadar taşma vardı. Her nedeni ayrı ayrı bulunup düzeltildi. Sonuç: 3 dil x 100/200% x 4 genişlikte sıfır taşma. Bu sırada birkaç kez ölçüm yöntemim kendi yapay sonuçlarını üretti (dönmüş öğeler, henüz animasyonu başlamamış öğeler) ve düzeltilip yeniden ölçüldü.
+33. **Uzun ekranda konuşma hiç başlamıyor, mesajlar sonsuza kadar görünmez kalıyordu (gerçek içerik kaybı).** Konuşmayı ve bölüm animasyonlarını başlatan görünürlük gözlemcisi "öğenin en az %35'i görünsün" diye bekliyordu. Çok büyük metinde ya da çok küçük ekranda kart ekrandan birkaç kat uzun olunca %35'i bir ekrana hiç sığmıyordu. Tetikleyici, öğenin üst kenarının ekrana girmesi olarak değiştirildi. Test: 320 piksel + %200 metin + Almanca, sayfa sonuna kadar gezilince hiçbir içerik gizli kalmıyor.
+34. **Testlerimde iki yanıltıcı sonuç.** (a) Tekrar gönderim testleri "kayıt sayısı" karşılaştırıyordu ama yönetici listesi yalnızca son 50 kaydı verdiği için, dolu bir geliştirme veri tabanında sayı sabit kalıp test yanlış kırıldı. Kayıt numarasıyla karşılaştırılacak şekilde düzeltildi. (b) Tarayıcı testlerinin çalışması için sunucuyu elle başlatmak gerekiyordu ve `npm test` bunları hiç çalıştırmıyordu. Tek komutlu bir çalıştırıcı yazıldı (`npm run test:e2e`), sunucuyu boş geçici veri klasörüyle kendisi başlatıp kapatıyor.
+35. **Yapay zekânın kendi eksik iddiası.** Fiş şeritlerini eklediğimde "yerleşti, doğruladım" yazmıştım ama yalnızca HTML'de dört tane olduğunu saymıştım, gerçekte hiç görünmüyorlardı. Bu, "bir görsel değişiklik için gerçekten görünmesini doğrulamadan 'tamam' deme" dersini verdi. Bu turda gördüğüm her şeyi (Lighthouse, axe, ekran görüntüsü) bu derse göre kontrol ettim.
+36. Bir düzeltme denemesi sırasında macOS `sed` komutu hata verdi ve değişiklik uygulanmadı. Eski görüntüye bakıp düzeldi sanılmıştı. Görüntü yeniden üretilerek kontrol edildi ve düzeltme Edit aracıyla yapıldı.
 
 ## Sınanmayanlar
 
@@ -89,7 +119,9 @@ Hatalar hangi tasarım sürümünde bulunduysa oraya göre yazıldı. 2. sürüm
 - Ekran okuyucu ile elle test yapılmadı.
 - Safari ve Firefox'ta denenmedi, yalnızca Chromium.
 - İngilizce ve Almanca çevirilerin dil bilgisi ve üslubu anadili konuşan biri tarafından okunmadı. Yalnızca bütünlük (eksik, boş, çevrilmemiş metin) otomatik sınandı.
-- Koyu temada ekran okuyucu ve gerçek cihazda görsel kontrol yapılmadı.
+- Koyu temada ve genel olarak ekran okuyucu ve gerçek cihazda görsel kontrol yapılmadı. Erişilebilirlik denetimi otomatik araçlarla (axe-core, Lighthouse) ve kendi ölçümlerimle yapıldı. Otomatik araçlar erişilebilirlik sorunlarının yalnızca bir kısmını yakalar.
+- GitHub Actions dosyası (`.github/workflows/ci.yml`) yazıldı ama depo henüz GitHub'a gönderilmediği için hiç çalışmadı. Tarayıcı işi bu yüzden ilk çalıştırmalarda yalnızca bilgi verecek biçimde işaretli.
+- Lighthouse yerel makinede, benzetilmiş ağ ve işlemci yavaşlatmasıyla çalıştırıldı. Gerçek cihaz ve gerçek ağ ölçümü değildir.
 - Animasyonların akıcılığı (kare hızı) düşük güçlü telefonlarda ölçülmedi. Zemindeki büyük lekeler sürekli boyandığı için düşük güçlü cihazlarda pil ve akıcılık etkisi ayrıca ölçülmeli. Ekran görüntüleri hareketin ortasından alınan karelerdir, gerçek akıcılığı yerine geçmez.
 
 ## Süre

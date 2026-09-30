@@ -1,13 +1,23 @@
 // İki sürücü, tek arayüz: DATABASE_URL varsa Postgres (canlı), yoksa gömülü PGlite (yerel geliştirme ve test).
+const { SERVICES, LIMITS } = require('../public/validation');
+
+// Geçerlilik sınırları veri tabanında da kural olarak durur (savunma derinliği): uygulama bir gün hatalı bir
+// değer üretse bile ya da biri veri tabanına doğrudan yazsa bile bozuk kayıt girmez. Sınırlar validation.js ile aynı kaynaktan gelir.
+const SERVICE_LIST = Object.keys(SERVICES).map((k) => `'${k}'`).join(', ');
 const SCHEMA = `
   CREATE TABLE IF NOT EXISTS support_requests (
     id         BIGSERIAL PRIMARY KEY,
-    name       TEXT        NOT NULL,
-    email      TEXT        NOT NULL,
-    service    TEXT        NOT NULL,
-    message    TEXT        NOT NULL,
+    name       TEXT        NOT NULL CHECK (char_length(name) BETWEEN ${LIMITS.name.min} AND ${LIMITS.name.max}),
+    email      TEXT        NOT NULL CHECK (char_length(email) <= ${LIMITS.email.max} AND email ~ '^[^\\s@]+@[^\\s@]+\\.[^\\s@]{2,}$'),
+    service    TEXT        NOT NULL CHECK (service IN (${SERVICE_LIST})),
+    message    TEXT        NOT NULL CHECK (char_length(message) BETWEEN ${LIMITS.message.min} AND ${LIMITS.message.max}),
+    client_id  TEXT,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
-  )
+  );
+  -- Eski kurulumlar için: sütun yoksa eklenir
+  ALTER TABLE support_requests ADD COLUMN IF NOT EXISTS client_id TEXT;
+  -- Aynı gönderim anahtarıyla ikinci kez gelen istek yeni kayıt oluşturmaz (tekrar göndermek güvenlidir)
+  CREATE UNIQUE INDEX IF NOT EXISTS support_requests_client_id_key ON support_requests (client_id) WHERE client_id IS NOT NULL;
 `;
 
 async function createDb({ connectionString, dataDir } = {}) {

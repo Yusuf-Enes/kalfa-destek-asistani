@@ -1,7 +1,9 @@
 """Tarayıcı (Chromium) uçtan uca testi. Çalıştırma: python3 tests/e2e.py [http://localhost:3111]
 Sunucu önceden çalışıyor olmalı. Ekran görüntüleri shots/ klasörüne yazılır."""
+import json
 import os
 import sys
+import urllib.request
 from playwright.sync_api import sync_playwright
 
 BASE = sys.argv[1] if len(sys.argv) > 1 else "http://localhost:3111"
@@ -27,6 +29,23 @@ def settle(page):
     page.wait_for_timeout(1500)
     page.evaluate("window.scrollTo(0, 0)")
     page.wait_for_timeout(600)
+
+
+def admin_list():
+    """Sunucudaki kayıtları yönetici anahtarıyla okur (kalıcı kaydın gerçekten yazıldığını doğrulamak için)."""
+    req = urllib.request.Request(BASE + "/api/requests", headers={"x-admin-token": os.environ.get("ADMIN_TOKEN", "yerel-deneme")})
+    with urllib.request.urlopen(req) as res:
+        return json.loads(res.read())["requests"]
+
+
+def max_id():
+    rows = admin_list()
+    return max((int(r["id"]) for r in rows), default=0)
+
+
+def new_since(base):
+    """Verilen numaradan sonra oluşan kayıt sayısı. Yönetici listesi yalnızca son 50 kaydı verdiği için toplam sayı değil numara karşılaştırılır."""
+    return len([r for r in admin_list() if int(r["id"]) > base])
 
 
 def pick_lang(page, code):
@@ -131,7 +150,7 @@ with sync_playwright() as p:
     fill_valid(page)
     page.click("#submit-btn")
     page.wait_for_selector("#form-alert:not([hidden])")
-    check("ağ kesintisi: 'kaydedilmedi' mesajı, başarı yok", "kaydedilmedi" in page.inner_text("#form-alert") and page.locator("#success").is_hidden())
+    check("ağ kesintisi: 'kaydedilmiş olabilir, tekrar göndermek güvenli' mesajı, başarı yok", "kaydedilmiş olabilir" in page.inner_text("#form-alert") and "güvenlidir" in page.inner_text("#form-alert") and page.locator("#success").is_hidden())
     ctx.close()
 
     # ---- Çift tıklama: tek istek
@@ -377,11 +396,11 @@ with sync_playwright() as p:
     page.wait_for_load_state("networkidle")
     snapshot = lambda: page.evaluate("Object.fromEntries([...document.querySelectorAll('[data-i18n]')].map((e, i) => [i, e.textContent]))")
     tr_before = snapshot()
-    check("dil: varsayılan Türkçe (html lang, başlık, düğme etiketi ve kodu)", page.evaluate("document.documentElement.lang") == "tr" and "Müşteri destek asistanı" in page.title() and page.get_attribute(".lang-toggle", "aria-label") == "Dil: Türkçe" and page.inner_text(".lang-code") == "TR")
+    check("dil: varsayılan Türkçe (html lang, başlık, düğme etiketi ve kodu)", page.evaluate("document.documentElement.lang") == "tr" and "Müşteri destek asistanı" in page.title() and page.get_attribute(".lang-toggle", "aria-label") == "TR, Dil: Türkçe" and page.inner_text(".lang-code") == "TR")
 
     pick_lang(page, 'en')
     page.wait_for_timeout(200)
-    check("dil: İngilizce başlık, html lang, sayfa başlığı, düğme etiketi ve seçili öğe", page.inner_text("#hero-title").replace("\n", " ") == "Kalfa handles it, the master decides." and page.evaluate("document.documentElement.lang") == "en" and page.title() == "Kalfa · Customer support assistant" and page.get_attribute(".lang-toggle", "aria-label") == "Language: English" and page.inner_text(".lang-code") == "EN" and page.get_attribute(".lang-menu [data-lang='en']", "aria-current") == "true" and page.get_attribute(".lang-menu [data-lang='tr']", "aria-current") is None)
+    check("dil: İngilizce başlık, html lang, sayfa başlığı, düğme etiketi ve seçili öğe", page.inner_text("#hero-title").replace("\n", " ") == "Kalfa handles it, the master decides." and page.evaluate("document.documentElement.lang") == "en" and page.title() == "Kalfa · Customer support assistant" and page.get_attribute(".lang-toggle", "aria-label") == "EN, Language: English" and page.inner_text(".lang-code") == "EN" and page.get_attribute(".lang-menu [data-lang='en']", "aria-current") == "true" and page.get_attribute(".lang-menu [data-lang='tr']", "aria-current") is None)
     check("dil: İngilizce menü, konuşma ve form", page.inner_text(".nav a") == "Who handles what" and "When will my order arrive" in page.inner_text(".chat-log") and page.inner_text("label[for='name']") == "Your name" and page.inner_text("#submit-btn") == "Send request")
     check("dil: seçim tarayıcıda saklanır", page.evaluate("localStorage.getItem('kalfa-lang')") == "en")
     page.reload(); page.wait_for_load_state("networkidle")
@@ -422,7 +441,7 @@ with sync_playwright() as p:
     check("menü: dışarı tıklayınca kapanır", page.locator(".lang-menu").is_hidden())
     page.click(".lang-toggle")
     page.click(".lang-menu [data-lang='de']")
-    check("menü: dil seçince menü kapanır, odak düğmeye döner, düğme yeni dili gösterir", page.locator(".lang-menu").is_hidden() and page.evaluate("document.activeElement.className") == "lang-toggle" and page.inner_text(".lang-code") == "DE" and page.get_attribute(".lang-toggle", "aria-label") == "Sprache: Deutsch" and page.evaluate("document.documentElement.lang") == "de")
+    check("menü: dil seçince menü kapanır, odak düğmeye döner, düğme yeni dili gösterir", page.locator(".lang-menu").is_hidden() and page.evaluate("document.activeElement.className") == "lang-toggle" and page.inner_text(".lang-code") == "DE" and page.get_attribute(".lang-toggle", "aria-label") == "DE, Sprache: Deutsch" and page.evaluate("document.documentElement.lang") == "de")
     page.click(".lang-toggle")
     check("menü: seçili dil işaretli (aria-current) ve menü etiketi çevrilmiş", page.get_attribute(".lang-menu [data-lang='de']", "aria-current") == "true" and page.get_attribute(".lang-menu", "aria-label") == "Sprache")
     page.click(".lang-toggle")
@@ -657,6 +676,205 @@ with sync_playwright() as p:
     check("mesaj: İngilizce iade cevabı", "return request" in page.inner_text(".chat-log .msg-bot:nth-of-type(4) .txt") and "get back to you as soon as possible" in page.inner_text(".chat-log .msg-bot:nth-of-type(4) .txt"))
     pick_lang(page, "de")
     check("mesaj: Almanca iade cevabı", "Rückgabeanfrage erhalten" in page.inner_text(".chat-log .msg-bot:nth-of-type(4) .txt") and "so schnell wie möglich" in page.inner_text(".chat-log .msg-bot:nth-of-type(4) .txt"))
+    ctx.close()
+
+    # ================= ERİŞİLEBİLİRLİK DENETİMİ (axe-core) =================
+
+    AXE = os.path.join(os.path.dirname(__file__), "..", "node_modules", "axe-core", "axe.min.js")
+    TAGS = '["wcag2a","wcag2aa","wcag21a","wcag21aa","wcag22aa","best-practice"]'
+
+    def axe_violations(page):
+        page.add_script_tag(path=AXE)
+        res = page.evaluate("axe.run(document, {runOnly: {type: 'tag', values: %s}})" % TAGS)
+        return [(v["id"], v["nodes"][0]["target"][0] if v["nodes"] else "?") for v in res["violations"]]
+
+    axe_bad = []
+    axe_states = 0
+    for theme in ("light", "dark"):
+        for lang in ("tr", "en", "de"):
+            ctx = browser.new_context(viewport={"width": 1280, "height": 900}, color_scheme=theme, bypass_csp=True)
+            page = ctx.new_page()
+            page.goto(BASE + "/?lang=" + lang)
+            page.wait_for_load_state("networkidle")
+            page.wait_for_selector("body[data-chat-done='1']", timeout=20000)
+            page.evaluate("window.scrollTo(0, document.documentElement.scrollHeight)")
+            page.wait_for_timeout(1500)
+            axe_states += 1
+            axe_bad += [(f"{theme}/{lang}/sayfa",) + v for v in axe_violations(page)]
+            if lang == "tr":
+                page.click("#submit-btn"); page.wait_for_timeout(250)
+                axe_states += 1
+                axe_bad += [(f"{theme}/{lang}/hata durumu",) + v for v in axe_violations(page)]
+                page.click(".lang-toggle"); page.wait_for_timeout(250)
+                axe_states += 1
+                axe_bad += [(f"{theme}/{lang}/açık dil menüsü",) + v for v in axe_violations(page)]
+            ctx.close()
+    ctx = browser.new_context(viewport={"width": 390, "height": 844}, bypass_csp=True)
+    page = ctx.new_page()
+    page.goto(BASE); page.wait_for_load_state("networkidle")
+    # Telefonda konuşma ekranın altında başlar. Belirme animasyonu sürerken ölçülürse renkler yarı saydamdır ve
+    # axe kontrastı yanlış hesaplar (4 denemenin 3'ünde sahte ihlal), bu yüzden konuşmanın bitmesi beklenir.
+    page.locator(".chat").scroll_into_view_if_needed()
+    page.wait_for_selector("body[data-chat-done='1']", timeout=20000); page.wait_for_timeout(900)
+    page.evaluate("window.scrollTo(0, document.documentElement.scrollHeight)"); page.wait_for_timeout(1500)
+    axe_states += 1
+    axe_bad += [("mobil",) + v for v in axe_violations(page)]
+    ctx.close()
+    ctx = browser.new_context(viewport={"width": 1280, "height": 900}, bypass_csp=True)
+    page = ctx.new_page()
+    page.goto(BASE); page.wait_for_load_state("networkidle")
+    fill_valid(page); page.click("#submit-btn"); page.wait_for_selector("#success:not([hidden])"); page.wait_for_timeout(1200)
+    axe_states += 1
+    axe_bad += [("başarı durumu",) + v for v in axe_violations(page)]
+    ctx.close()
+    ctx = browser.new_context(viewport={"width": 1280, "height": 900}, bypass_csp=True)
+    page = ctx.new_page()
+    page.goto(BASE + "/yok-boyle-bir-sayfa"); page.wait_for_load_state("networkidle")
+    axe_states += 1
+    axe_bad += [("404 sayfası",) + v for v in axe_violations(page)]
+    ctx.close()
+    check(f"erişilebilirlik (axe, WCAG 2.2 AA + en iyi uygulamalar): {axe_states} durumda ihlal yok" + (f" | İHLALLER: {axe_bad[:6]}" if axe_bad else ""), not axe_bad)
+
+    # WCAG 2.5.3 (Label in Name): görünen metin erişilebilir isimde geçmeli
+    ctx = browser.new_context(viewport={"width": 1280, "height": 900})
+    page = ctx.new_page()
+    page.goto(BASE); page.wait_for_load_state("networkidle")
+    mism = page.evaluate("""[...document.querySelectorAll('a[aria-label], button[aria-label]')].filter(e => {
+      const vis = (e.textContent || '').replace(/\\s+/g, ' ').trim().toLowerCase();
+      return vis && !e.getAttribute('aria-label').toLowerCase().includes(vis); }).map(e => e.className || e.tagName)""")
+    check(f"erişilebilirlik: görünen metin erişilebilir isimde geçiyor (Label in Name) {mism or ''}", not mism)
+
+    # Başlık sırası atlamaz, sayfada tek h1 var, ana yapı işaretli
+    hs = page.evaluate("[...document.querySelectorAll('h1,h2,h3')].map(h => +h.tagName[1])")
+    jumps = [(a, b) for a, b in zip(hs, hs[1:]) if b - a > 1]
+    check(f"erişilebilirlik: tek h1 var, başlık seviyeleri atlamıyor ({hs.count(1)} adet h1)", hs.count(1) == 1 and not jumps)
+    check("erişilebilirlik: header, nav, main, footer yer işaretleri var", page.evaluate("['header', 'nav', 'main', 'footer'].every(t => document.querySelector(t))"))
+
+    # Dokunma hedefleri en az 24x24 CSS piksel (WCAG 2.2, 2.5.8)
+    small = page.evaluate("""[...document.querySelectorAll('button, a.btn, .nav a, input, select, textarea, .skip')].filter(e => {
+      const r = e.getBoundingClientRect(); return r.width > 0 && (r.width < 24 || r.height < 24); }).map(e => e.className || e.id || e.tagName)""")
+    check(f"erişilebilirlik: tüm düğme ve alanlar en az 24x24 px {small or ''}", not small)
+    ctx.close()
+
+    # Metin büyütülünce (WCAG 1.4.4, 1.4.10): sayfa yana taşmaz, konuşma yine de başlar, sohbet kartında metin kesilmez.
+    # Çok büyük metinde ya da çok küçük ekranda kart, ekrandan uzun olur. Eskiden konuşma bu yüzden hiç başlamaz ve
+    # mesajlar sonsuza kadar görünmez kalırdı.
+    CLIPPED = """(() => { const chat = document.querySelector('.chat').getBoundingClientRect(); const bad = [];
+      document.querySelectorAll('.chat .txt, .chat .who, .chat dt, .chat dd, .chat .stamp, .chat-caption').forEach(e => { const r = e.getBoundingClientRect();
+        if (r.width > 0 && (r.left < chat.left - 2 || r.right > chat.right + 2)) bad.push(e.className || e.tagName); });
+      return bad; })()"""
+    worst_zoom = 0; stuck = []; clipped = []; combos = 0
+    for lang in ("tr", "en", "de"):
+        for zoom in ("100%", "200%"):
+            for vw in (320, 390, 768, 1280):
+                combos += 1
+                ctx = browser.new_context(viewport={"width": vw, "height": 800})
+                page = ctx.new_page()
+                page.goto(BASE + "/?lang=" + lang)
+                page.wait_for_load_state("networkidle")
+                page.evaluate(f"document.documentElement.style.fontSize = '{zoom}'")
+                page.locator(".chat").scroll_into_view_if_needed()
+                try:
+                    page.wait_for_selector("body[data-chat-done='1']", timeout=12000)
+                except Exception:
+                    stuck.append((lang, zoom, vw))
+                page.wait_for_timeout(600)
+                worst_zoom = max(worst_zoom, page.evaluate("document.documentElement.scrollWidth - document.documentElement.clientWidth"))
+                if page.evaluate(CLIPPED): clipped.append((lang, zoom, vw))
+                ctx.close()
+    check(f"büyütme: {combos} kombinasyonda (3 dil x 100/200% x 320-1280 px) yatay taşma yok (en büyük {worst_zoom} px)", worst_zoom == 0)
+    check(f"büyütme: konuşma her kombinasyonda başlıyor, uzun kartta bile ({stuck or 'takılan yok'})", not stuck)
+    check(f"büyütme: sohbet kartında hiçbir metin kesilmiyor ({clipped or 'kesilen yok'})", not clipped)
+
+    # Bölüm görünme animasyonları ne kadar uzun olurlarsa olsunlar tetiklenir: küçük ekran + %200 metinde tüm bölümlere inince hepsi görünür
+    ctx = browser.new_context(viewport={"width": 320, "height": 640})
+    page = ctx.new_page()
+    page.goto(BASE + "/?lang=de")
+    page.wait_for_load_state("networkidle")
+    page.evaluate("document.documentElement.style.fontSize = '200%'")
+    page.wait_for_timeout(300)
+    total = page.evaluate("document.documentElement.scrollHeight")
+    y = 0
+    while y < total:
+        page.evaluate(f"window.scrollTo({{top: {y}, behavior: 'instant'}})")
+        page.wait_for_timeout(120)
+        y += 300
+    page.wait_for_timeout(1800)
+    hidden = page.evaluate("""[...document.querySelectorAll('.reveal-title, .rv, .split-col li, .services > div, .msg')].filter(e => getComputedStyle(e).opacity !== '1' && !e.closest('.reveal-title')).map(e => e.className || e.tagName)""")
+    titles = page.evaluate("[...document.querySelectorAll('.reveal-title')].every(e => e.classList.contains('in-view'))")
+    check(f"büyütme: 320 px + %200 metin + Almanca: sayfayı sonuna kadar gezince hiçbir içerik gizli kalmıyor ({hidden[:4] or 'gizli yok'})", not hidden and titles)
+    ctx.close()
+
+    # ================= TEKRAR GÖNDERİM (uçtan uca) =================
+    ctx = browser.new_context(viewport={"width": 1280, "height": 900})
+    page = ctx.new_page()
+    bodies = []
+    mode = {"lose": True}
+
+    def lose_response(route):
+        bodies.append(route.request.post_data_json)
+        if mode["lose"]:
+            route.fetch()      # istek sunucuya gerçekten gider ve kaydedilir
+            route.abort()      # ama cevap istemciye ulaşmaz (bağlantı koptu)
+        else:
+            route.continue_()
+
+    page.route("**/api/requests", lose_response)
+    page.goto(BASE)
+    base = max_id()
+    fill_valid(page)
+    page.click("#submit-btn")
+    page.wait_for_selector("#form-alert:not([hidden])")
+    check("tekrar gönderim: cevap kaybolunca dürüst uyarı ('kaydedilmiş olabilir'), başarı gösterilmez", "kaydedilmiş olabilir" in page.inner_text("#form-alert") and page.locator("#success").is_hidden())
+    check("tekrar gönderim: istek gönderim anahtarıyla gitti", isinstance(bodies[0].get("clientId"), str) and len(bodies[0]["clientId"]) >= 16)
+    check("tekrar gönderim: cevap kaybolsa da sunucu kaydı yazmıştı", new_since(base) == 1)
+    mode["lose"] = False
+    page.click("#submit-btn")            # aynı içerikle tekrar
+    page.wait_for_selector("#success:not([hidden])")
+    check("tekrar gönderim: aynı içerikle tekrar aynı anahtarı kullanır", bodies[1]["clientId"] == bodies[0]["clientId"])
+    check("tekrar gönderim: sunucu ikinci kayıt açmadı (tekrar gönderim güvenli)", new_since(base) == 1)
+    first_key = bodies[0]["clientId"]
+    page.click("#new-request")
+    fill_valid(page); page.click("#submit-btn"); page.wait_for_selector("#success:not([hidden])")
+    check("tekrar gönderim: yeni talepte yeni anahtar kullanılır ve ayrı kayıt oluşur", bodies[2]["clientId"] != first_key and new_since(base) == 2)
+    ctx.close()
+
+    # Düzeltilmiş içerik eskisinin yerine sessizce yutulmaz: alan değişince anahtar yenilenir
+    ctx = browser.new_context(viewport={"width": 1280, "height": 900})
+    page = ctx.new_page()
+    bodies2 = []
+    mode2 = {"lose": True}
+
+    def lose2(route):
+        bodies2.append(route.request.post_data_json)
+        if mode2["lose"]:
+            route.fetch(); route.abort()
+        else:
+            route.continue_()
+
+    page.route("**/api/requests", lose2)
+    page.goto(BASE)
+    base2 = max_id()
+    fill_valid(page); page.click("#submit-btn"); page.wait_for_selector("#form-alert:not([hidden])")
+    mode2["lose"] = False
+    page.fill("#message", "Mesajı düzelttim: artık başka bir şey soruyorum ve bunu kaydetmenizi istiyorum.")
+    page.click("#submit-btn"); page.wait_for_selector("#success:not([hidden])")
+    check("tekrar gönderim: içerik düzeltilince yeni anahtar kullanılır, düzeltme kaybolmaz", bodies2[1]["clientId"] != bodies2[0]["clientId"] and new_since(base2) == 2)
+    ctx.close()
+
+    # ================= 404 SAYFASI =================
+    ctx = browser.new_context(viewport={"width": 1280, "height": 900})
+    page = ctx.new_page()
+    resp = page.goto(BASE + "/olmayan-adres")
+    check("404: bilinmeyen adres 404 durum koduyla düzgün sayfa gösterir", resp.status == 404 and "bulunamadı" in page.inner_text("h1") and page.locator("a.btn[href='/']").is_visible() and "Cannot GET" not in page.content())
+    page.click("a.btn[href='/']")
+    page.wait_for_load_state("networkidle")
+    check("404: 'Ana sayfaya dön' bağlantısı ana sayfaya götürür", page.url.rstrip("/") == BASE.rstrip("/") and page.locator("#hero-title").is_visible())
+    ctx.close()
+    ctx = browser.new_context(viewport={"width": 1280, "height": 900}, color_scheme="dark")
+    page = ctx.new_page()
+    page.goto(BASE + "/yok?lang=de")
+    check("404: koyu tema ve Almanca çalışır", page.evaluate("document.documentElement.getAttribute('data-theme')") == "dark" and "nicht gefunden" in page.inner_text("h1"))
     ctx.close()
 
     # ---- Gönderirken düğmede şerit hareketi

@@ -11,8 +11,8 @@
   "js.fixFields": "Bazı alanları düzeltmeniz gerekiyor.",
   "js.saveFailed": "Talebiniz kaydedilemedi. Lütfen biraz sonra tekrar deneyin.",
   "js.rate": "Çok fazla deneme yaptınız. Bir dakika sonra tekrar deneyin.",
-  "js.timeout": "Sunucu zamanında yanıt vermedi. Talebiniz kaydedilmedi, tekrar deneyin.",
-  "js.network": "Sunucuya ulaşılamadı. Bağlantınızı kontrol edip tekrar deneyin. Talebiniz kaydedilmedi.",
+  "js.timeout": "Sunucu zamanında yanıt vermedi. Talebiniz kaydedilmiş olabilir. Aynı talebi tekrar göndermek güvenlidir, iki kez kaydedilmez.",
+  "js.network": "Sunucuya ulaşılamadı. Bağlantınızı kontrol edin. Talebiniz kaydedilmiş olabilir, aynı talebi tekrar göndermek güvenlidir.",
   "f.submit": "Talebi gönder"
 },
     en: {
@@ -94,8 +94,11 @@
   "js.fixFields": "Some fields need to be corrected.",
   "js.saveFailed": "Your request could not be saved. Please try again in a moment.",
   "js.rate": "Too many attempts. Try again in a minute.",
-  "js.timeout": "The server did not respond in time. Your request was not saved, please try again.",
-  "js.network": "Could not reach the server. Check your connection and try again. Your request was not saved."
+  "js.timeout": "The server did not respond in time. Your request may have been saved. Sending the same request again is safe, it will not be saved twice.",
+  "js.network": "Could not reach the server. Check your connection. Your request may have been saved, and sending the same request again is safe.",
+    "nf.title": "This page could not be found.",
+    "nf.text": "The address you are looking for does not exist or may have moved. You can continue from the home page.",
+    "nf.home": "Back to the home page"
 },
     de: {
   "meta.title": "Kalfa · Kundensupport-Assistent",
@@ -176,8 +179,11 @@
   "js.fixFields": "Einige Felder müssen korrigiert werden.",
   "js.saveFailed": "Ihre Anfrage konnte nicht gespeichert werden. Bitte versuchen Sie es gleich noch einmal.",
   "js.rate": "Zu viele Versuche. Bitte in einer Minute erneut versuchen.",
-  "js.timeout": "Der Server hat nicht rechtzeitig geantwortet. Ihre Anfrage wurde nicht gespeichert, bitte erneut versuchen.",
-  "js.network": "Der Server ist nicht erreichbar. Prüfen Sie Ihre Verbindung und versuchen Sie es erneut. Ihre Anfrage wurde nicht gespeichert."
+  "js.timeout": "Der Server hat nicht rechtzeitig geantwortet. Ihre Anfrage wurde möglicherweise gespeichert. Dieselbe Anfrage erneut zu senden ist sicher, sie wird nicht doppelt gespeichert.",
+  "js.network": "Der Server ist nicht erreichbar. Prüfen Sie Ihre Verbindung. Ihre Anfrage wurde möglicherweise gespeichert, das erneute Senden derselben Anfrage ist sicher.",
+    "nf.title": "Diese Seite wurde nicht gefunden.",
+    "nf.text": "Die gesuchte Adresse existiert nicht oder wurde verschoben. Sie können auf der Startseite weitermachen.",
+    "nf.home": "Zurück zur Startseite"
 }
   };
   var LANGS = ['tr', 'en', 'de'];
@@ -262,7 +268,8 @@
     if (toggle) {
       var code = toggle.querySelector('.lang-code');
       if (code) code.textContent = lang.toUpperCase();
-      toggle.setAttribute('aria-label', (lang === 'tr' ? 'Dil' : DICT[lang]['tools.lang']) + ': ' + NAMES[lang]);
+      // Erişilebilir isim, ekrandaki görünen metni (dil kodu) içermeli: sesle kontrol "TR" diyerek düğmeyi bulabilsin (WCAG 2.5.3)
+      toggle.setAttribute('aria-label', lang.toUpperCase() + ', ' + (lang === 'tr' ? 'Dil' : DICT[lang]['tools.lang']) + ': ' + NAMES[lang]);
     }
   }
 

@@ -10,6 +10,16 @@
   var FIELDS = ['name', 'email', 'service', 'message'];
   var TIMEOUT_MS = 15000;
   var sending = false;
+  // Gönderim anahtarı: aynı içerikle tekrar gönderimde aynı kalır (sunucu ikinci kayıt açmaz),
+  // alanlardan biri değişince yenilenir (düzeltilmiş içerik eskisinin yerine sessizce yutulmaz).
+  var clientId = null;
+  function newId() {
+    if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
+    var a = new Uint8Array(16);
+    if (window.crypto && window.crypto.getRandomValues) window.crypto.getRandomValues(a);
+    else for (var i = 0; i < 16; i++) a[i] = Math.floor(Math.random() * 256);
+    return Array.prototype.map.call(a, function (b) { return (b < 16 ? '0' : '') + b.toString(16); }).join('');
+  }
 
   // Seçili dil ve çeviri (i18n.js yüklenmediyse Türkçe varsayılan)
   function lang() { return window.I18N ? window.I18N.lang : 'tr'; }
@@ -97,10 +107,11 @@
       if (input.value !== '' || input.hasAttribute('aria-invalid')) check();
     });
     input.addEventListener('input', function () {
+      clientId = null;
       if (input.hasAttribute('aria-invalid')) check();
       if (n === 'message') updateCounter();
     });
-    if (n === 'service') input.addEventListener('change', check);
+    if (n === 'service') input.addEventListener('change', function () { clientId = null; check(); });
   });
 
   form.addEventListener('submit', function (event) {
@@ -118,7 +129,7 @@
     fetch('/api/requests', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(result.values),
+      body: JSON.stringify(Object.assign({ clientId: clientId || (clientId = newId()) }, result.values)),
       signal: controller.signal,
     })
       .then(function (res) {
@@ -129,6 +140,7 @@
       .then(function (r) {
         // Başarı yalnızca sunucu kaydı oluşturduğunu (201 + id) söylediğinde gösterilir.
         if (r.status === 201 && r.body && r.body.id) {
+          clientId = null;
           successId.textContent = '#' + r.body.id;
           form.hidden = true;
           success.hidden = false;
@@ -157,6 +169,7 @@
 
   newRequestBtn.addEventListener('click', function () {
     form.reset();
+    clientId = null;
     clearAll();
     updateCounter();
     success.hidden = true;

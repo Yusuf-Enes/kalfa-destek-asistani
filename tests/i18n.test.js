@@ -5,7 +5,8 @@ const path = require('node:path');
 const I18N = require('../public/i18n.js');
 const Validation = require('../public/validation.js');
 
-const html = fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8');
+const html = fs.readFileSync(path.join(__dirname, '..', 'public', 'index.html'), 'utf8')
+  + '\n' + fs.readFileSync(path.join(__dirname, '..', 'public', '404.html'), 'utf8'); // çeviri anahtarları iki sayfada da taranır
 const appJs = fs.readFileSync(path.join(__dirname, '..', 'public', 'app.js'), 'utf8');
 
 const textKeys = [...html.matchAll(/data-i18n="([^"]+)"/g)].map((m) => m[1]);

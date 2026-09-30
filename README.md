@@ -18,6 +18,8 @@ Sayfa hizmeti anlatır. Gerçek bir yapay zekâ ya da otomasyon çalışmaz, ça
 - Aynı doğrulama kuralları hem tarayıcıda hem sunucuda çalışır (`public/validation.js` tek dosyadır, ikisi de onu kullanır). İstemci doğrulaması yalnızca kolaylıktır, güvenlik sunucudadır.
 - Gönderiliyor, başarı, alan hatası, sunucu hatası, zaman aşımı ve ağ kesintisi durumları ayrı ayrı ele alınır.
 - Başarı mesajı ve talep numarası yalnızca sunucu kaydı gerçekten yazdığında (`201` ve kayıt numarası) gösterilir.
+- **Tekrar göndermek güvenlidir:** her form doldurma bir gönderim anahtarı taşır. Cevap kaybolur ya da zaman aşımı olursa kayıt yazılmış olabilir, arayüz bunu dürüstçe söyler ("kaydedilmiş olabilir"). Aynı içerikle tekrar gönderince sunucu ikinci bir kayıt açmaz, ilk kaydı döndürür. Alan değişirse anahtar yenilenir, düzeltilmiş içerik kaybolmaz.
+- Veri tabanı, uygulamayı atlayan bozuk bir kaydı da reddeder (`CHECK` kuralları). API yanıtları önbelleğe alınmaz. Bilinmeyen adresler düzgün bir 404 sayfası gösterir.
 
 ## Teknoloji
 
@@ -29,7 +31,7 @@ Veri tabanı iki modda çalışır ve SQL aynıdır:
 
 ## Çalıştırma
 
-Gereksinim: Node.js 20 veya üstü (Node 20, 22 ve 26'da 42 sunucu testinin tamamı geçti).
+Gereksinim: Node.js 20 veya üstü (Node 20, 22 ve 26'da 49 sunucu testinin tamamı geçti).
 
 ```bash
 npm install
@@ -54,23 +56,26 @@ curl -H "x-admin-token: gizli-bir-deger" http://localhost:3000/api/requests
 ## Test
 
 ```bash
-npm test                       # 42 sunucu testi (node:test): API, güvenlik, çeviri bütünlüğü, kalıcılık ve Postgres yolu
-python3 tests/e2e.py           # 126 tarayıcı kontrolü, sunucu çalışırken
+npm test                       # 49 sunucu testi (node:test): API, güvenlik, çeviri bütünlüğü, kalıcılık, Postgres yolu, veri tabanı kuralları
+npm run test:e2e               # 145 tarayıcı kontrolü (Chromium). Sunucuyu boş bir geçici veri klasörüyle kendisi başlatır ve kapatır
+npm run test:all               # ikisi arka arkaya
 ```
 
-Tarayıcı testi için bir kerelik kurulum: `python3 -m pip install playwright && python3 -m playwright install chromium`. Test sonunda `shots/` klasörüne ekran görüntüleri yazar.
+Tarayıcı testleri için bir kerelik kurulum: `python3 -m pip install playwright && python3 -m playwright install chromium`. Test sonunda `shots/` klasörüne ekran görüntüleri yazar. GitHub Actions ile de çalışır (`.github/workflows/ci.yml`).
 
-Sunucu testleri (çeviri bütünlüğü dahil: eksik, boş ya da çevrilmemiş metin yakalanır): geçerli ve geçersiz girdiler (sınır değerler dahil), kaydın gerçekten yazılması, SQL enjeksiyon denemesi, bozuk ve aşırı büyük gövde, veri tabanı hatasında başarı dönmemesi, hız sınırı, yönetici ucunun korunması, güvenlik başlıkları.
-Tarayıcı testi: dört ekran genişliğinde yatay taşma ve konsol hatası, hatalı ve başarılı gönderim, sunucu 500 dönünce başarı mesajının çıkmaması, ağ kesintisi, çift tıklama, klavye ile kullanım, "hareketi azalt" modunda durağan sayfa, kemerin açılışı, Kalfa'nin "yazıyor" durumu, adım çizgisinin çizilmesi, iki sütunun kalfadan ustaya sırayla gelmesi, kaydırma çizgisi, zemindeki lekelerin kaydırmaya bağlı ve sıçramasız hareketi, konuya göre ton değişimi, beyaz bant kalmaması, açılışta telefonda yatay taşma olmaması, konuşmanın hızı, lekelerin en koyu noktasında metin kontrastının en az 4,5 olması, açıklama ilerleme çizgisi, gönderirken şerit ve başarı kutusunun basılması, dil değiştirme ve kalıcılığı, çevrilmiş doğrulama ve hata mesajları, açılır dil menüsünün klavye ve odak davranışı, başlığın konumu, koyu tema ve iki temada da tüm metinlerin kontrastı, koyu temada lekelerin en parlak noktasında metin kontrastı.
+**Sunucu testleri:** geçerli ve geçersiz girdiler (sınır değerler dahil), kaydın gerçekten yazılması, SQL enjeksiyon denemesi, bozuk ve aşırı büyük gövde, veri tabanı hatasında başarı dönmemesi, hız sınırı, yönetici ucunun korunması, güvenlik başlıkları, tekrar gönderimin güvenli olması (gönderim anahtarı), veri tabanı düzeyindeki geçerlilik kuralları, API yanıtlarının önbelleğe alınmaması, 404 sayfası, çeviri bütünlüğü (eksik, boş ya da çevrilmemiş metin yakalanır), sunucunun kapatılıp açılınca kaydın yerinde durması, canlıda kullanılan Postgres yolunun gerçek Postgres protokolüyle sınanması, bağlantı kopunca sunucunun çökmemesi, canlıda `DATABASE_URL` yoksa açılmayı reddetmesi. Testler Node 20, 22 ve 26'da geçti.
 
-## Güvenlik önlemleri
+**Tarayıcı testleri:** görünüm ve yatay taşma (320 ile 1920 px, üç dil), hatalı ve başarılı gönderim, sunucu hatası ve ağ kesintisinde başarı gösterilmemesi, cevap kaybolduğunda tekrar göndermenin ikinci kayıt açmaması, çift tıklama, klavye kullanımı, "hareketi azalt" modunda durağan sayfa, animasyonlar, dil değiştirme ve kalıcılığı, çevrilmiş hata mesajları, açılır dil menüsünün klavye ve odak davranışı, koyu tema ve iki temada da tüm metinlerin kontrastı, zemindeki lekelerin en koyu ve en parlak noktasında metin kontrastı, **axe-core ile erişilebilirlik denetimi (WCAG 2.2 AA ve en iyi uygulamalar, 13 farklı durum)**, erişilebilir isim, başlık sırası, dokunma hedefi boyutu, %200 metin büyütmede taşma ve içerik kaybı.
 
-- Sunucuda zorunlu alan doğrulaması, izin verilen hizmet listesi, uzunluk sınırları, kontrol karakteri reddi.
-- Parametreli SQL sorgusu.
-- Helmet ile güvenlik başlıkları ve sıkı Content-Security-Policy (satır içi betik ve stil yok).
-- `POST /api/requests` için IP başına dakikada 10 istek sınırı, gövde boyutu 10 KB sınırı.
-- Kayıt listesi yönetici anahtarı olmadan kapalı. Anahtar sabit sürede karşılaştırılır.
-- Hata durumunda istemciye iç hata mesajı verilmez, form içeriği loglanmaz.
+## Değerlendirme ölçütlerine göre kanıtlar
+
+| Ölçüt | Nerede, neyle kanıtlı |
+|---|---|
+| Çalışan ürün ve gereksinimler | Landing page, form, sunucuda kalıcı kayıt: `public/`, `src/`. Canlı URL yukarıda. `npm run test:e2e` gerçek tarayıcıda uçtan uca doğrular |
+| Kod, veri akışı, temel güvenlik | Tek kural dosyası hem tarayıcıda hem sunucuda (`public/validation.js`), parametreli sorgu, veri tabanı `CHECK` kuralları, tekrar gönderim güvenli (gönderim anahtarı), CSP + Helmet, hız sınırı, korumalı yönetici ucu, canlıda veri tabanı adresi zorunlu. Ayrıntı: "Güvenlik önlemleri" |
+| AI ile üretim ve doğrulama | [AI_LOG.md](AI_LOG.md): araçlar, görev dağılımı, proje sahibinin gerçek talimatları, bulunan hatalar (kanıtlarıyla), sınanmayanlar |
+| Kullanılabilirlik ve erişilebilirlik | axe-core: 13 durumda ihlal yok. Lighthouse (mobil): Erişilebilirlik 100. Klavye, odak, atlama bağlantısı, `prefers-reduced-motion`, iki tema ve üç dil, %200 büyütme, kontrast ölçümleri |
+| Test, hata yönetimi ve teslim | 49 sunucu + 145 tarayıcı testi, CI, `render.yaml`, hata durumları (400, 429, 500, ağ, zaman aşımı), düzgün 404, bağlantı kopmasına dayanıklılık, README |
 
 ## Canlıya alma (GitHub + Render + Neon, ücretsiz planlar)
 
