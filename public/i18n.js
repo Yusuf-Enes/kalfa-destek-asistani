@@ -37,7 +37,7 @@
   "chat.m1": "When will my order arrive? Order no: 4821",
   "chat.m2": "Your order 4821 shipped yesterday. Estimated delivery is Thursday. I sent the tracking code to your email.",
   "chat.m3": "I changed my mind about another item, I'd like to return it.",
-  "chat.m4": "I've noted your return request. I'm asking the master about it, and they will email you by tomorrow at the latest.",
+  "chat.m4": "I've received your return request. We will get back to you as soon as possible.",
   "slip.title": "Note for the master",
   "slip.topic": "Subject",
   "slip.topic.v": "Return request",
@@ -119,7 +119,7 @@
   "chat.m1": "Wann kommt meine Bestellung an? Bestellnr.: 4821",
   "chat.m2": "Ihre Bestellung 4821 wurde gestern versandt. Voraussichtliche Lieferung am Donnerstag. Den Sendungscode habe ich Ihnen per E-Mail geschickt.",
   "chat.m3": "Ich habe mich bei einem anderen Artikel umentschieden und möchte ihn zurückgeben.",
-  "chat.m4": "Ihre Rückgabeanfrage habe ich notiert. Ich frage den Meister, spätestens morgen meldet er sich per E-Mail bei Ihnen.",
+  "chat.m4": "Ich habe Ihre Rückgabeanfrage erhalten. Wir melden uns so schnell wie möglich bei Ihnen.",
   "slip.title": "Notiz an den Meister",
   "slip.topic": "Betreff",
   "slip.topic.v": "Rückgabeanfrage",
@@ -182,6 +182,7 @@
   };
   var LANGS = ['tr', 'en', 'de'];
   var LANG_KEY = 'kalfa-lang';
+  var NAMES = { tr: 'Türkçe', en: 'English', de: 'Deutsch' };
   var api = { DICT: DICT, LANGS: LANGS, lang: 'tr' };
   if (typeof document === 'undefined') return api;
 
@@ -253,9 +254,16 @@
     document.title = lang === 'tr' ? meta.title : DICT[lang]['meta.title'];
     if (descEl) descEl.setAttribute('content', lang === 'tr' ? meta.description : DICT[lang]['meta.desc']);
     document.documentElement.setAttribute('lang', lang);
-    Array.prototype.forEach.call(document.querySelectorAll('.lang button[data-lang]'), function (b) {
-      b.setAttribute('aria-pressed', b.getAttribute('data-lang') === lang ? 'true' : 'false');
+    // Açılır dil menüsü: seçili dil işaretlenir, düğmede kodu ve tam adı görünür
+    Array.prototype.forEach.call(document.querySelectorAll('.lang-menu button[data-lang]'), function (b) {
+      if (b.getAttribute('data-lang') === lang) b.setAttribute('aria-current', 'true'); else b.removeAttribute('aria-current');
     });
+    var toggle = document.querySelector('.lang-toggle');
+    if (toggle) {
+      var code = toggle.querySelector('.lang-code');
+      if (code) code.textContent = lang.toUpperCase();
+      toggle.setAttribute('aria-label', (lang === 'tr' ? 'Dil' : DICT[lang]['tools.lang']) + ': ' + NAMES[lang]);
+    }
   }
 
   api.setLang = function (lang, persist) {
@@ -274,8 +282,52 @@
     var start = LANGS.indexOf(fromUrl) !== -1 ? fromUrl : (LANGS.indexOf(stored) !== -1 ? stored : 'tr');
     if (start !== 'tr') api.setLang(start, LANGS.indexOf(fromUrl) !== -1);
     else { api.lang = 'tr'; apply('tr'); }
-    Array.prototype.forEach.call(document.querySelectorAll('.lang button[data-lang]'), function (b) {
-      b.addEventListener('click', function () { api.setLang(b.getAttribute('data-lang'), true); });
+    initMenu();
+  }
+
+  // Açılır dil menüsü: düğmeyle açılır, seçince, Escape'e basınca ya da dışarı tıklayınca kapanır.
+  // Ok tuşlarıyla gezilir. Kapanınca odak düğmeye döner.
+  function initMenu() {
+    var root = document.querySelector('.lang');
+    var toggle = document.querySelector('.lang-toggle');
+    var menu = document.getElementById('lang-menu');
+    if (!root || !toggle || !menu) return;
+    var items = Array.prototype.slice.call(menu.querySelectorAll('button[data-lang]'));
+
+    function isOpen() { return !menu.hidden; }
+    function open() {
+      menu.hidden = false;
+      toggle.setAttribute('aria-expanded', 'true');
+      var current = menu.querySelector('[aria-current="true"]') || items[0];
+      if (current) current.focus();
+    }
+    function close(returnFocus) {
+      if (!isOpen()) return;
+      menu.hidden = true;
+      toggle.setAttribute('aria-expanded', 'false');
+      if (returnFocus) toggle.focus();
+    }
+
+    toggle.addEventListener('click', function () { if (isOpen()) close(false); else open(); });
+    items.forEach(function (b) {
+      b.addEventListener('click', function () {
+        api.setLang(b.getAttribute('data-lang'), true);
+        close(true);
+      });
+    });
+    document.addEventListener('keydown', function (e) {
+      if (!isOpen()) return;
+      if (e.key === 'Escape') { e.preventDefault(); close(true); return; }
+      if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+        var at = items.indexOf(document.activeElement);
+        if (at === -1) return;
+        e.preventDefault();
+        items[(at + (e.key === 'ArrowDown' ? 1 : items.length - 1)) % items.length].focus();
+      }
+    });
+    document.addEventListener('click', function (e) { if (isOpen() && !root.contains(e.target)) close(false); });
+    root.addEventListener('focusout', function (e) {
+      if (isOpen() && e.relatedTarget && !root.contains(e.relatedTarget)) close(false);
     });
   }
 

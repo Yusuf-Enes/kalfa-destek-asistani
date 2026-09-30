@@ -118,7 +118,7 @@ a { color: inherit; }
 .text-link:hover { background-size: 100% 4px; }
 
 /* ---------- Kahraman ---------- */
-.hero { padding: 3rem 0 4.5rem; }
+.hero { padding: 2rem 0 4.5rem; }
 .hero-grid { display: grid; gap: 3.5rem; align-items: center; }
 .hero h1 { color: var(--tezgah); }
 .hero h1 .w { display: inline-block; overflow: hidden; vertical-align: top; padding-bottom: 0.14em; margin-bottom: -0.14em; }
@@ -317,8 +317,9 @@ input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 2px
   .wrap { padding-inline: 2.5rem; }
   .nav { display: flex; margin-left: auto; }
   .tools { margin-left: 0; }
-  .hero { padding: 5rem 0 6.5rem; }
-  .hero-grid { grid-template-columns: 1.1fr 0.9fr; gap: 4.5rem; }
+  .hero { padding: 3rem 0 6.5rem; }
+  .hero-grid { grid-template-columns: 1.1fr 0.9fr; gap: 4.5rem; align-items: start; }
+  .hero-copy { padding-top: 0.5rem; }
   .chat { padding: 1.5rem 1.5rem 2rem; }
   .statement, .how, .services-band { padding: 8.5rem 0; }
   .split { padding: 0 0 8.5rem; }
@@ -421,19 +422,37 @@ body { background: transparent; }
   @keyframes float { from { transform: translate3d(0, 0, 0) scale(1); } to { transform: translate3d(5vmax, -4vmax, 0) scale(1.09); } }
 }
 
-/* ---------- Dil seçici ve tema düğmesi ---------- */
-.lang { display: flex; }
-.lang button {
-  min-width: 2.5rem; height: 2.5rem; padding: 0 0.5rem;
-  border: 1px solid var(--line); background: transparent; color: var(--ink);
+/* ---------- Dil seçici (açılır menü) ve tema düğmesi ---------- */
+.lang { position: relative; }
+.lang-toggle {
+  display: inline-flex; align-items: center; gap: 0.4rem; height: 2.5rem; padding: 0 0.6rem;
+  border: 1px solid var(--line); border-radius: 3px; background: transparent; color: var(--ink);
   font: inherit; font-size: 0.8125rem; font-weight: 700; letter-spacing: 0.03em; cursor: pointer;
-  transition: background-color 160ms, color 160ms;
+  transition: background-color 160ms;
 }
-.lang button + button { margin-left: -1px; }
-.lang button:first-child { border-radius: 3px 0 0 3px; }
-.lang button:last-child { border-radius: 0 3px 3px 0; }
-.lang button:hover { background: var(--zemin-2); }
-.lang button[aria-pressed="true"] { background: var(--tezgah); border-color: var(--tezgah); color: var(--light); position: relative; z-index: 1; }
+.lang-toggle:hover, .lang-toggle[aria-expanded="true"] { background: var(--zemin-2); }
+.lang-toggle svg { width: 1.15rem; height: 1.15rem; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.lang-toggle .icon-chevron { width: 0.95rem; height: 0.95rem; transition: transform 200ms var(--ease-out); }
+.lang-toggle[aria-expanded="true"] .icon-chevron { transform: rotate(180deg); }
+.lang-menu {
+  position: absolute; right: 0; top: calc(100% + 0.5rem); z-index: 50; min-width: 10rem; margin: 0; padding: 0.3rem; list-style: none;
+  background: var(--fis); border: 1px solid var(--line); border-radius: 4px; box-shadow: 0 16px 32px -14px rgba(23, 55, 46, 0.45);
+}
+.lang-menu[hidden] { display: none; }
+.lang-menu button {
+  display: flex; align-items: center; justify-content: space-between; gap: 1rem; width: 100%; padding: 0.6rem 0.75rem;
+  border: 0; border-radius: 3px; background: transparent; color: var(--ink); font: inherit; font-size: 1rem; font-weight: 500; text-align: left; cursor: pointer;
+}
+.lang-menu button .code { font-size: 0.75rem; font-weight: 700; letter-spacing: 0.04em; color: var(--muted); }
+.lang-menu button:hover { background: var(--zemin-2); }
+.lang-menu button[aria-current="true"] { background: var(--tezgah); color: var(--light); font-weight: 700; }
+.lang-menu button[aria-current="true"] .code { color: var(--light); }
+:root[data-theme="dark"] .lang-menu { box-shadow: 0 16px 32px -14px rgba(0, 0, 0, 0.85); }
+@media (prefers-reduced-motion: no-preference) {
+  .lang-menu:not([hidden]) { animation: menu-in 160ms var(--ease-out); }
+  @keyframes menu-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: none; } }
+}
+@media (prefers-reduced-motion: reduce) { .lang-toggle .icon-chevron { transition: none; } }
 .theme-toggle {
   display: grid; place-items: center; width: 2.5rem; height: 2.5rem; padding: 0;
   border: 1px solid var(--line); border-radius: 3px; background: transparent; color: var(--ink); cursor: pointer;

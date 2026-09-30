@@ -131,3 +131,5 @@ Koyu temada zemindeki lekeler de koyu yeşile döner. Renkleri, arka planla kar�
 ## Diller
 
 Türkçe (varsayılan), İngilizce ve Almanca. Türkçe metin HTML'in içindedir, çeviriler `public/i18n.js` içindeki sözlüktedir. Marka adı ve "Kalfa" her dilde aynı kalır. Usta ve kalfa benzetmesi dile göre uyarlanır: Türkçede usta, İngilizcede "the master", Almanca'da "der Meister" (Almanca'da usta-çırak geleneği doğal olarak "Geselle" ve "Meister" ikilisidir, ama burada marka adı Kalfa olduğu için yalnızca "Meister" kullanılır). Hata mesajları ve gönderme durumu da seçili dilde görünür.
+
+**Dil seçici:** Başlıkta tek bir düğme (küre simgesi, dil kodu, ok). Basınca Türkçe, English, Deutsch adlarının (her biri kendi dilinde) yazılı olduğu bir menü açılır. Seçili dil marka yeşiliyle işaretlidir. Menü Escape'le, dışarı tıklamayla ya da odak dışarı çıkınca kapanır, ok tuşlarıyla gezilir, kapanınca odak düğmeye döner.

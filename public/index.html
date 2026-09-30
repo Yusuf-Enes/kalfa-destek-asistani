@@ -38,10 +38,17 @@
         <a href="#hizmetler" data-i18n="nav.hizmet">Hizmetler</a>
       </nav>
       <div class="tools">
-        <div class="lang" role="group" aria-label="Dil" data-i18n-attr="aria-label:tools.lang">
-          <button type="button" data-lang="tr" lang="tr" aria-pressed="true" title="Türkçe">TR</button>
-          <button type="button" data-lang="en" lang="en" aria-pressed="false" title="English">EN</button>
-          <button type="button" data-lang="de" lang="de" aria-pressed="false" title="Deutsch">DE</button>
+        <div class="lang">
+          <button class="lang-toggle" type="button" aria-haspopup="true" aria-expanded="false" aria-controls="lang-menu" aria-label="Dil: Türkçe">
+            <svg class="icon-globe" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.6 2.6 3.9 5.6 3.9 9s-1.3 6.4-3.9 9c-2.6-2.6-3.9-5.6-3.9-9S9.4 5.6 12 3Z"/></svg>
+            <span class="lang-code">TR</span>
+            <svg class="icon-chevron" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+          <ul class="lang-menu" id="lang-menu" aria-label="Dil" data-i18n-attr="aria-label:tools.lang" hidden>
+            <li><button type="button" data-lang="tr" lang="tr">Türkçe<span class="code" aria-hidden="true">TR</span></button></li>
+            <li><button type="button" data-lang="en" lang="en">English<span class="code" aria-hidden="true">EN</span></button></li>
+            <li><button type="button" data-lang="de" lang="de">Deutsch<span class="code" aria-hidden="true">DE</span></button></li>
+          </ul>
         </div>
         <button class="theme-toggle" type="button" aria-pressed="false" aria-label="Koyu tema" data-i18n-attr="aria-label:tools.theme">
           <svg class="icon-moon" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z"/></svg>
@@ -72,7 +79,7 @@
             <li class="msg msg-customer"><span class="who" data-i18n="chat.customer">Müşteri</span><span class="txt" data-i18n="chat.m1">Siparişim ne zaman gelir? Sipariş no: 4821</span></li>
             <li class="msg msg-bot"><span class="who">Kalfa</span><span class="txt" data-i18n="chat.m2">4821 numaralı siparişiniz dün kargoya verildi. Tahmini teslim perşembe. Takip kodunu e-postanıza gönderdim.</span></li>
             <li class="msg msg-customer"><span class="who" data-i18n="chat.customer">Müşteri</span><span class="txt" data-i18n="chat.m3">Başka bir üründen vazgeçtim, iade etmek istiyorum.</span></li>
-            <li class="msg msg-bot"><span class="who">Kalfa</span><span class="txt" data-i18n="chat.m4">İade talebinizi aldım. Bunu ustaya soruyorum, en geç yarın size e-postayla dönecekler.</span></li>
+            <li class="msg msg-bot"><span class="who">Kalfa</span><span class="txt" data-i18n="chat.m4">İade talebinizi aldım. En kısa zamanda size geri dönüş sağlanacak.</span></li>
             <li class="msg msg-note">
               <div class="slip-shadow">
                 <div class="slip">

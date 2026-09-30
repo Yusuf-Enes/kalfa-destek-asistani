@@ -29,6 +29,13 @@ def settle(page):
     page.wait_for_timeout(600)
 
 
+def pick_lang(page, code):
+    """Dil menüsünü açar (kapalıysa) ve verilen dili seçer."""
+    if page.get_attribute(".lang-toggle", "aria-expanded") != "true":
+        page.click(".lang-toggle")
+    page.click(f".lang-menu [data-lang='{code}']")
+
+
 def fill_valid(page):
     page.fill("#name", "Ayşe Demir")
     page.fill("#email", "ayse@ornek-sirket.com")
@@ -370,25 +377,81 @@ with sync_playwright() as p:
     page.wait_for_load_state("networkidle")
     snapshot = lambda: page.evaluate("Object.fromEntries([...document.querySelectorAll('[data-i18n]')].map((e, i) => [i, e.textContent]))")
     tr_before = snapshot()
-    check("dil: varsayılan Türkçe (html lang, başlık, TR düğmesi seçili)", page.evaluate("document.documentElement.lang") == "tr" and "Müşteri destek asistanı" in page.title() and page.get_attribute(".lang [data-lang='tr']", "aria-pressed") == "true")
+    check("dil: varsayılan Türkçe (html lang, başlık, düğme etiketi ve kodu)", page.evaluate("document.documentElement.lang") == "tr" and "Müşteri destek asistanı" in page.title() and page.get_attribute(".lang-toggle", "aria-label") == "Dil: Türkçe" and page.inner_text(".lang-code") == "TR")
 
-    page.click(".lang [data-lang='en']")
+    pick_lang(page, 'en')
     page.wait_for_timeout(200)
-    check("dil: İngilizce başlık, html lang, sayfa başlığı, düğme durumu", page.inner_text("#hero-title").replace("\n", " ") == "Kalfa handles it, the master decides." and page.evaluate("document.documentElement.lang") == "en" and page.title() == "Kalfa · Customer support assistant" and page.get_attribute(".lang [data-lang='en']", "aria-pressed") == "true" and page.get_attribute(".lang [data-lang='tr']", "aria-pressed") == "false")
+    check("dil: İngilizce başlık, html lang, sayfa başlığı, düğme etiketi ve seçili öğe", page.inner_text("#hero-title").replace("\n", " ") == "Kalfa handles it, the master decides." and page.evaluate("document.documentElement.lang") == "en" and page.title() == "Kalfa · Customer support assistant" and page.get_attribute(".lang-toggle", "aria-label") == "Language: English" and page.inner_text(".lang-code") == "EN" and page.get_attribute(".lang-menu [data-lang='en']", "aria-current") == "true" and page.get_attribute(".lang-menu [data-lang='tr']", "aria-current") is None)
     check("dil: İngilizce menü, konuşma ve form", page.inner_text(".nav a") == "Who handles what" and "When will my order arrive" in page.inner_text(".chat-log") and page.inner_text("label[for='name']") == "Your name" and page.inner_text("#submit-btn") == "Send request")
     check("dil: seçim tarayıcıda saklanır", page.evaluate("localStorage.getItem('kalfa-lang')") == "en")
     page.reload(); page.wait_for_load_state("networkidle")
     check("dil: sayfa yenilenince seçilen dil korunur", page.evaluate("document.documentElement.lang") == "en" and page.inner_text("#submit-btn") == "Send request")
 
-    page.click(".lang [data-lang='de']")
+    pick_lang(page, 'de')
     page.wait_for_timeout(200)
     check("dil: Almanca başlık, seçenekler ve düğme", page.inner_text("#hero-title").replace("\n", " ") == "Kalfa kümmert sich, der Meister entscheidet." and page.inner_text("#service option:first-child") == "Leistung auswählen" and page.inner_text("#submit-btn") == "Anfrage senden" and page.evaluate("document.documentElement.lang") == "de")
     check("dil: başlık kelimeleri animasyon için yeniden bölünür", page.evaluate("document.querySelectorAll('#hero-title .w').length") == 6)
 
-    page.click(".lang [data-lang='tr']")
+    pick_lang(page, 'tr')
     page.wait_for_timeout(200)
     check("dil: Türkçeye dönünce tüm metinler ilk hâlinin birebir aynısı", snapshot() == tr_before and page.evaluate("document.querySelectorAll('#hero-title .w').length") == 5)
     page.evaluate("localStorage.clear()")
+    ctx.close()
+
+    # ---- Dil seçici açılır menü olarak çalışır
+    ctx = browser.new_context(viewport={"width": 1280, "height": 900})
+    page = ctx.new_page()
+    page.goto(BASE)
+    page.wait_for_load_state("networkidle")
+    check("menü: kapalıyken başlıkta yan yana dil düğmesi yok, tek düğme var", page.locator(".lang-menu").is_hidden() and page.locator(".lang [data-lang]:visible").count() == 0 and page.locator(".lang-toggle").is_visible() and page.get_attribute(".lang-toggle", "aria-expanded") == "false")
+    page.click(".lang-toggle")
+    check("menü: düğmeye basınca açılır", page.locator(".lang-menu").is_visible() and page.get_attribute(".lang-toggle", "aria-expanded") == "true")
+    names = page.evaluate("[...document.querySelectorAll('.lang-menu button')].map(b => b.firstChild.textContent.trim())")
+    check(f"menü: dil adları kendi dilinde ({names})", names == ["Türkçe", "English", "Deutsch"])
+    check("menü: açılınca odak seçili dilin öğesinde", page.evaluate("document.activeElement.getAttribute('data-lang')") == "tr")
+    page.keyboard.press("ArrowDown")
+    check("menü: aşağı ok bir sonraki dile geçer", page.evaluate("document.activeElement.getAttribute('data-lang')") == "en")
+    page.keyboard.press("ArrowDown"); page.keyboard.press("ArrowDown")
+    check("menü: ok tuşları başa sarar", page.evaluate("document.activeElement.getAttribute('data-lang')") == "tr")
+    page.keyboard.press("ArrowUp")
+    check("menü: yukarı ok sona sarar", page.evaluate("document.activeElement.getAttribute('data-lang')") == "de")
+    page.keyboard.press("Escape")
+    check("menü: Escape menüyü kapatır ve odağı düğmeye döndürür", page.locator(".lang-menu").is_hidden() and page.evaluate("document.activeElement.className") == "lang-toggle" and page.get_attribute(".lang-toggle", "aria-expanded") == "false")
+    page.click(".lang-toggle")
+    page.mouse.click(300, 500)
+    check("menü: dışarı tıklayınca kapanır", page.locator(".lang-menu").is_hidden())
+    page.click(".lang-toggle")
+    page.click(".lang-menu [data-lang='de']")
+    check("menü: dil seçince menü kapanır, odak düğmeye döner, düğme yeni dili gösterir", page.locator(".lang-menu").is_hidden() and page.evaluate("document.activeElement.className") == "lang-toggle" and page.inner_text(".lang-code") == "DE" and page.get_attribute(".lang-toggle", "aria-label") == "Sprache: Deutsch" and page.evaluate("document.documentElement.lang") == "de")
+    page.click(".lang-toggle")
+    check("menü: seçili dil işaretli (aria-current) ve menü etiketi çevrilmiş", page.get_attribute(".lang-menu [data-lang='de']", "aria-current") == "true" and page.get_attribute(".lang-menu", "aria-label") == "Sprache")
+    page.click(".lang-toggle")
+    check("menü: düğmeye tekrar basınca kapanır", page.locator(".lang-menu").is_hidden())
+    page.click(".lang-toggle")
+    for _ in range(4):
+        page.keyboard.press("Tab")
+    page.wait_for_timeout(100)
+    check("menü: odak menüden dışarı çıkınca menü kapanır", page.locator(".lang-menu").is_hidden())
+    ctx.close()
+
+    # Telefonda menü ekranın dışına taşmaz, en dar ekranda da açılır
+    bad_fit = 0
+    for vw, vh in ((320, 640), (360, 740), (390, 844)):
+        ctx = browser.new_context(viewport={"width": vw, "height": vh})
+        page = ctx.new_page()
+        page.goto(BASE)
+        page.click(".lang-toggle")
+        box = page.evaluate("(() => { const r = document.getElementById('lang-menu').getBoundingClientRect(); return [r.left, r.right, document.documentElement.scrollWidth - document.documentElement.clientWidth]; })()")
+        if box[0] < 0 or box[1] > vw or box[2] > 0: bad_fit += 1
+        ctx.close()
+    check("menü: 320/360/390 px'te menü ekran içinde, yatay taşma yok", bad_fit == 0)
+
+    # Koyu temada menü koyu yüzeyde
+    ctx = browser.new_context(viewport={"width": 1280, "height": 900}, color_scheme="dark")
+    page = ctx.new_page()
+    page.goto(BASE)
+    page.click(".lang-toggle")
+    check("menü: koyu temada menü koyu yüzeyde", page.evaluate("getComputedStyle(document.getElementById('lang-menu')).backgroundColor") == "rgb(20, 35, 29)")
     ctx.close()
 
     # Adres parametresi seçimi geçersiz kılar, geçersiz değer yok sayılır
@@ -410,7 +473,7 @@ with sync_playwright() as p:
         page.goto(BASE + "/?lang=" + lang)
         page.click("#submit-btn")
         check(f"{lang}: alan hataları seçili dilde", page.inner_text("#name-error") == expected_name and page.inner_text("#email-error") == expected_email)
-        page.click(".lang [data-lang='tr']")
+        pick_lang(page, 'tr')
         page.wait_for_timeout(150)
         check(f"{lang}: dil değişince görünen hata metni yeni dilde yeniden yazılır", "Adınızı 2 ile 80" in page.inner_text("#name-error"))
         ctx.close()
@@ -433,7 +496,7 @@ with sync_playwright() as p:
     page.click("#submit-btn")
     page.wait_for_selector("#form-alert:not([hidden])")
     check("de: sunucu 500 dönünce uyarı Almanca, başarı yok", "konnte nicht gespeichert" in page.inner_text("#form-alert") and page.locator("#success").is_hidden())
-    page.click(".lang [data-lang='en']")
+    pick_lang(page, 'en')
     page.wait_for_timeout(150)
     check("de→en: görünen genel uyarı dil değişince yeniden yazılır", "could not be saved" in page.inner_text("#form-alert"))
     ctx.close()
@@ -496,7 +559,7 @@ with sync_playwright() as p:
       for (const l of layers.reverse()) base = base.map((v, i) => l[3] * l[i] + (1 - l[3]) * v);
       return { fg: parse(getComputedStyle(el).color).slice(0, 3), bg: base };
     }"""
-    TEXT = [".hero h1", ".lead", ".hero-copy .fine", ".nav a", ".lang button:not([aria-pressed='true'])", ".lang button[aria-pressed='true']",
+    TEXT = [".hero h1", ".lead", ".hero-copy .fine", ".nav a", ".lang-toggle", ".lang-menu button:not([aria-current='true'])", ".lang-menu [aria-current='true']", ".lang-menu .code",
             ".msg-customer .txt", ".msg-bot .txt", ".msg-customer .who", ".chat-caption", ".slip .who", ".slip-lines dt", ".slip-lines dd", ".stamp",
             ".statement h2", ".statement-body p", ".split h2", ".split-kalfa h3", ".split-kalfa li", ".split-usta h3", ".split-usta li", ".split-note",
             ".how h2", ".how-intro p", ".steps h3", ".steps p", ".services dt", ".services dd", ".form-intro h2", ".form-intro p", ".form-intro .fine",
@@ -569,6 +632,32 @@ with sync_playwright() as p:
             worst_dark = min(worst_dark, (luminance(muted) + 0.05) / (lmax + 0.05))
         ctx.close()
     check(f"tema: koyu temada lekelerin en parlak noktasında soluk metin kontrastı {worst_dark:.2f} (en az 4,5)", worst_dark >= 4.5)
+
+    # ---- Başlık sayfa açılınca yeterince yukarıda, iade mesajı yeni metinle
+    worst_top = 0
+    for vw, vh in ((1280, 800), (1440, 900), (1920, 1080), (390, 844)):
+        for lang in ("tr", "en", "de"):
+            ctx = browser.new_context(viewport={"width": vw, "height": vh})
+            page = ctx.new_page()
+            page.goto(BASE + "/?lang=" + lang)
+            page.wait_for_load_state("networkidle")
+            top = page.evaluate("document.querySelector('h1').getBoundingClientRect().top")
+            gap = top - page.evaluate("document.querySelector('.site-header').getBoundingClientRect().bottom")
+            worst_top = max(worst_top, gap)
+            ctx.close()
+    check(f"başlık: 4 ekran boyutu ve 3 dilde üst çubuğun en fazla 80 px altında başlar (en büyük boşluk {worst_top:.0f} px)", worst_top <= 80)
+
+    ctx = browser.new_context(viewport={"width": 1280, "height": 900})
+    page = ctx.new_page()
+    page.goto(BASE)
+    reply = page.inner_text(".chat-log .msg-bot:nth-of-type(4) .txt")
+    check("mesaj: iade cevabı istenen Türkçe metin", reply == "İade talebinizi aldım. En kısa zamanda size geri dönüş sağlanacak.")
+    check("mesaj: eski 'ustaya soruyorum' metni kalmadı", "ustaya soruyorum" not in page.inner_text(".chat-log"))
+    pick_lang(page, "en")
+    check("mesaj: İngilizce iade cevabı", "return request" in page.inner_text(".chat-log .msg-bot:nth-of-type(4) .txt") and "get back to you as soon as possible" in page.inner_text(".chat-log .msg-bot:nth-of-type(4) .txt"))
+    pick_lang(page, "de")
+    check("mesaj: Almanca iade cevabı", "Rückgabeanfrage erhalten" in page.inner_text(".chat-log .msg-bot:nth-of-type(4) .txt") and "so schnell wie möglich" in page.inner_text(".chat-log .msg-bot:nth-of-type(4) .txt"))
+    ctx.close()
 
     # ---- Gönderirken düğmede şerit hareketi
     ctx = browser.new_context()
